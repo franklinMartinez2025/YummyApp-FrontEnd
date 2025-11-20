@@ -1,0 +1,30 @@
+.restaurants-page {
+  padding: 20px 0;
+}
+
+.page-title {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.restaurants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.restaurants-loading,
+.restaurants-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.restaurants-error {
+  color: #e74c3c;
+}
+
