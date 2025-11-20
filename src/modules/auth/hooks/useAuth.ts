@@ -11,28 +11,30 @@ export const useAuth = () => {
   const authService = new AuthService(authAdapter);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      const result = await authService.login(email, password);
-      
-      if (result.success && result.data) {
-        const { jwToken, ...user } = result.data;
-        localStorage.setItem('auth_token', jwToken);
-        localStorage.setItem('user', JSON.stringify(user));
-        return { success: true, user };
-      } else {
-        throw new Error(result.message || 'Error al iniciar sesión');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
+  try {
+    const result = await authService.login(email, password);
+
+    if (result.succeeded && result.data) {
+      console.log("result", result);
+
+        console.log("result", result);
+        const { jwToken, refreshToken, ...user } = result.data;
+        console.log("jwToken", jwToken);
+        return { success: true, user, token: jwToken, refreshToken };
+    } else {
+      throw new Error(result.message || 'Error al iniciar sesión');
     }
-  };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
+    setError(errorMessage);
+    return { success: false, error: errorMessage };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const register = async (email: string, password: string, fullName: string, phoneNumber: string, role=Number(UserRole.Client)) => {
     setIsLoading(true);
@@ -41,7 +43,7 @@ export const useAuth = () => {
     try {
       const result = await authService.register(email, password, fullName, phoneNumber, role);
       
-      if (result.success) {
+      if (result.succeeded) {
         return { success: true };
       } else {
         throw new Error(result.message || 'Error al registrarse');
@@ -61,8 +63,7 @@ export const useAuth = () => {
     } catch (err) {
       console.error('Error al cerrar sesión:', err);
     } finally {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
+      // localStorage cleanup is handled by AuthProvider
     }
   };
 

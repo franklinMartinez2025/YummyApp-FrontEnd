@@ -14,17 +14,19 @@ const LoginPage = () => {
     e.preventDefault();
     const result = await login(email, password);
     
-    if (result.success && result.user) {
-      const token = localStorage.getItem('auth_token') || '';
+   if (result.success && result.user) {
       const userForContext = {
         id: result.user.email,
-        name: result.user.fullName,
+        fullName: result.user.fullName,
         email: result.user.email,
-        roles: result.user.roles
+        roles: result.user.roles,
+        refreshToken: result.refreshToken
       };
-      contextLogin(userForContext, token);
-      navigate('/');
-    }
+      contextLogin(userForContext, result.token);
+
+  navigate('/');
+}
+
   };
 
   return (

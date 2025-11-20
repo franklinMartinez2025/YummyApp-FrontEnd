@@ -3,9 +3,10 @@ import { UserRole } from '../../core/domain/enums/user-role';
 
 export interface AuthUser {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   roles: UserRole;
+  refreshToken?: string;
 }
 
 export interface AuthContextType {
