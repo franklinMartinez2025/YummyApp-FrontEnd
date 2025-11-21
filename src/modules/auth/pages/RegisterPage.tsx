@@ -10,7 +10,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passError, setPassError] = useState('');
-  
+
   const { register, login, isLoading, error } = useAuth();
   const { login: contextLogin } = useAuthContext();
   const navigate = useNavigate();
@@ -25,19 +25,19 @@ const RegisterPage = () => {
     }
 
     const result = await register(email, password, name, phone);
-    
+
     if (result.success) {
 
-      const loginResult = await login(email, password);  
+      const loginResult = await login(email, password);
       if (loginResult.success && loginResult.user) {
         const token = localStorage.getItem('auth_token') || '';
         const userForContext = {
           id: loginResult.user.email,
-          name: loginResult.user.fullName,
+          fullName: loginResult.user.fullName,
           email: loginResult.user.email,
           roles: loginResult.user.roles
         };
-        
+
         contextLogin(userForContext, token);
         navigate('/');
       }
@@ -47,7 +47,7 @@ const RegisterPage = () => {
   return (
     <div>
       <h2 className="text-center text-white mb-4 fw-bold">Crear Cuenta</h2>
-      
+
       {error && (
         <div className="alert alert-danger border-0 bg-danger bg-opacity-25 text-white mb-4" role="alert">
           <i className="bi bi-exclamation-circle me-2"></i> {error}
@@ -99,7 +99,7 @@ const RegisterPage = () => {
           />
           <label htmlFor="floatingPhone">Teléfono</label>
         </div>
-        
+
         <div className="form-floating mb-3">
           <input
             type="password"

@@ -56,8 +56,8 @@ export const PublicHeader = () => {
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
                     >
-                      <div className="user-avatar">{user.name?.charAt(0).toUpperCase() || 'U'}</div>
-                      <span className="d-none d-lg-block fw-bold text-dark">{user.name || 'Usuario'}</span>
+                      <div className="user-avatar">{user.fullName?.charAt(0).toUpperCase() || 'U'}</div>
+                      <span className="d-none d-lg-block fw-bold text-dark">{user.fullName || 'Usuario'}</span>
                     </button>
                     <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0 animate slideIn" aria-labelledby="userMenuButton">
                       <li>
