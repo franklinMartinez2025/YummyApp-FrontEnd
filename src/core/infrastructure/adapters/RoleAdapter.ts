@@ -1,5 +1,5 @@
 import type { GenericItemName } from "../../../shared/types/common";
-import type { ListedResponse } from "../../application/common/api-reponses/listed-response";
+import type { ListedResponse } from "../../../shared/types/api";
 import type { IRoleGateway } from "../../domain/gateways/IRoleGateway";
 import { apiClient } from "../api/apiClient";
 

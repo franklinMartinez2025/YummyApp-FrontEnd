@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { RestaurantDto } from "../../../../core/application/dtos/restaurant/RestaurantDto";
 import type { MenuCategoryDto } from "../../../../core/application/dtos/restaurant/MenuCategoryDto";
-import type { LoadingState } from "../../../../shared/types";
+import type { LoadingState } from "../../../../shared/types/api";
 
 // Mock data for menu
 const MOCK_MENU: MenuCategoryDto[] = [

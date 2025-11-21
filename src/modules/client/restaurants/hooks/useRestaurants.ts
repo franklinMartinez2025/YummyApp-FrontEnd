@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import type { RestaurantDto } from "../../../../core/application/dtos/restaurant/RestaurantDto";
 import { RestaurantAdapter } from "../../../../core/infrastructure/adapters/RestaurantAdapter";
 import { RestaurantService } from "../../../../core/application/services/RestaurantService";
-import type { LoadingState } from "../../../../shared/types";
+import type { LoadingState } from "../../../../shared/types/api";
 
 /**
  * Hook personalizado para manejar restaurantes

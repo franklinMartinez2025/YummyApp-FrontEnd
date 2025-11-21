@@ -1,10 +1,9 @@
-import type { LoginResponseDto } from '../../application/dtos/auth/login-response.dto';
-import type { LoginDto} from '../../application/dtos/auth/login.dto';
-import type { RegisterDto } from '../../application/dtos/auth/register.dto';
-import type { Response } from '../../application/common/api-reponses/response';
+import type { LoginResponseDto } from "../../application/dtos/auth/login-response.dto";
+import type { LoginDto } from "../../application/dtos/auth/login.dto";
+import type { RegisterDto } from "../../application/dtos/auth/register.dto";
+import type { Response } from "../../../shared/types/api";
 
 export interface IAuthGateway {
-
   /** Iniciar sesión */
   login(credentials: LoginDto): Promise<Response<LoginResponseDto>>;
 
@@ -14,4 +13,3 @@ export interface IAuthGateway {
   /** Cierra sesión */
   logout(): Promise<Response<boolean>>;
 }
-

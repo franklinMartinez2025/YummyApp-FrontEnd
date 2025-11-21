@@ -2,7 +2,7 @@ import type { IAuthGateway } from "../../domain/gateways/IAuthGateway";
 import type { LoginDto } from "../../application/dtos/auth/login.dto";
 import type { RegisterDto } from "../../application/dtos/auth/register.dto";
 import { apiClient } from "../api/apiClient";
-import type { Response } from "../../application/common/api-reponses/response";
+import type { Response } from "../../../shared/types/api";
 import type { LoginResponseDto } from "../../application/dtos/auth/login-response.dto";
 
 export class AuthAdapter implements IAuthGateway {
