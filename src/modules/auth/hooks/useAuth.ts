@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { AuthService } from "../../../core/application/services/AuthService";
 import { AuthAdapter } from "../../../core/infrastructure/adapters/AuthAdapter";
-import { UserRole } from "../../../core/domain/enums/user-role";
 
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +36,7 @@ export const useAuth = () => {
     password: string,
     fullName: string,
     phoneNumber: string,
-    role = Number(UserRole.Client)
+    role: string = "Client" // Default to string 'Client' or whatever is appropriate
   ) => {
     setIsLoading(true);
     setError(null);

@@ -1,10 +1,9 @@
 export interface Response<T> {
+  succeeded: boolean;
 
-    succeeded: boolean;
+  message: string | null;
 
-    message: string | null;
+  errors: string[];
 
-    errors: string[];
-
-    data: T | null;
+  data?: T | null;
 }

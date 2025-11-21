@@ -11,3 +11,8 @@ export interface BaseOption {
   label: string;
   value: string | number;
 }
+
+export interface GenericItemName {
+  id: number;
+  name: string;
+}

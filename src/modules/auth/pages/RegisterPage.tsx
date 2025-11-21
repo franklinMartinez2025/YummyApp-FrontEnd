@@ -9,6 +9,7 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('Client'); // Default role
   const [passError, setPassError] = useState('');
 
   const { register, login, isLoading, error } = useAuth();
@@ -24,7 +25,7 @@ const RegisterPage = () => {
       return;
     }
 
-    const result = await register(email, password, name, phone);
+    const result = await register(email, password, name, phone, role);
 
     if (result.success) {
 
@@ -98,6 +99,22 @@ const RegisterPage = () => {
             required
           />
           <label htmlFor="floatingPhone">Teléfono</label>
+        </div>
+
+        <div className="form-floating mb-3">
+          <select
+            className="form-select"
+            id="floatingRole"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            aria-label="Seleccionar Rol"
+          >
+            <option value="Client">Cliente</option>
+            <option value="Admin">Administrador</option>
+            <option value="RestaurantOwner">Dueño de Restaurante</option>
+            <option value="Delivery">Repartidor</option>
+          </select>
+          <label htmlFor="floatingRole">Rol</label>
         </div>
 
         <div className="form-floating mb-3">
