@@ -1,9 +1,16 @@
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { CartItem } from '../CartItem/CartItem';
 import './CartDrawer.css';
 
 export const CartDrawer = () => {
+    const navigate = useNavigate();
     const { items, isOpen, closeCart, totalAmount, totalItems } = useCart();
+
+    const handleCheckout = () => {
+        closeCart();
+        navigate('/checkout');
+    };
 
     return (
         <>
@@ -44,7 +51,10 @@ export const CartDrawer = () => {
                             <span className="text-muted">Total</span>
                             <span className="h4 mb-0 fw-bold text-primary">${totalAmount.toFixed(2)}</span>
                         </div>
-                        <button className="btn btn-primary w-100 py-2 fw-bold rounded-pill">
+                        <button
+                            className="btn btn-primary w-100 py-2 fw-bold rounded-pill"
+                            onClick={handleCheckout}
+                        >
                             Ir a Pagar
                         </button>
                     </div>

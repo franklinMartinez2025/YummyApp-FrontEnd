@@ -7,6 +7,7 @@ import { RestaurantsPage } from '../../modules/restaurants/pages/RestaurantsPage
 import { RestaurantDetailPage } from '../../modules/restaurants/pages/RestaurantDetailPage';
 import LoginPage from '../../modules/auth/pages/LoginPage';
 import RegisterPage from '../../modules/auth/pages/RegisterPage';
+import { CheckoutPage } from '../../modules/orders/pages/CheckoutPage';
 
 export const AppRouter = () => (
   <Routes>
@@ -15,6 +16,7 @@ export const AppRouter = () => (
       <Route path="home" element={<LandingPage />} />
       <Route path="restaurants" element={<RestaurantsPage />} />
       <Route path="restaurants/:id" element={<RestaurantDetailPage />} />
+      <Route path="checkout" element={<CheckoutPage />} />
     </Route>
     <Route path="/auth" element={<AuthLayout />}>
       <Route index element={<LoginPage />} />
