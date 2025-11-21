@@ -4,6 +4,7 @@ import { AuthLayout } from '../../shared/ui/Layout/auth/AuthLayout';
 import LandingPage from '../../modules/landing/pages/LandingPage';
 import NotFoundPage from '../../modules/shared/pages/NotFoundPage';
 import { RestaurantsPage } from '../../modules/restaurants/pages/RestaurantsPage';
+import { RestaurantDetailPage } from '../../modules/restaurants/pages/RestaurantDetailPage';
 import LoginPage from '../../modules/auth/pages/LoginPage';
 import RegisterPage from '../../modules/auth/pages/RegisterPage';
 
@@ -13,6 +14,7 @@ export const AppRouter = () => (
       <Route index element={<LandingPage />} />
       <Route path="home" element={<LandingPage />} />
       <Route path="restaurants" element={<RestaurantsPage />} />
+      <Route path="restaurants/:id" element={<RestaurantDetailPage />} />
     </Route>
     <Route path="/auth" element={<AuthLayout />}>
       <Route index element={<LoginPage />} />

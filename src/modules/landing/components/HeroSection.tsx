@@ -39,7 +39,7 @@ export const HeroSection = ({ slides }: HeroSectionProps) => {
               Entrega en menos de 30 minutos.
             </p>
             <div className="hero-buttons">
-              <Link to="/restaurantes" className="btn hero-button btn-lg pulse-animation">
+              <Link to="/restaurants" className="btn hero-button btn-lg pulse-animation">
                 Explorar Restaurantes
               </Link>
               <button className="btn hero-button-outline btn-lg ms-3">

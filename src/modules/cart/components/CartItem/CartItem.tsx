@@ -1,53 +1,62 @@
-import type { CartItemDto } from '../../../../core/application/dtos/cart/CartDto';
-import { formatCurrency } from '../../../../shared/utils/formatCurrency';
-import { Button } from '../../../../shared/ui/Button';
+import { useCart } from '../../context/CartContext';
+import type { CartItemDto } from '../../../../core/application/dtos/cart/CartItemDto';
 import './CartItem.css';
 
 interface CartItemProps {
   item: CartItemDto;
-  onIncrease: (productId: string) => void;
-  onDecrease: (productId: string) => void;
-  onRemove: (productId: string) => void;
 }
 
-export const CartItem = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => {
+export const CartItem = ({ item }: CartItemProps) => {
+  const { updateQuantity, removeItem } = useCart();
+  const { product, quantity } = item;
+
   return (
-    <div className="cart-item">
-      <img src={item.product.image} alt={item.product.name} className="cart-item-image" />
-      <div className="cart-item-info">
-        <h4 className="cart-item-name">{item.product.name}</h4>
-        <p className="cart-item-price">{formatCurrency(item.subtotal)}</p>
-        {item.specialInstructions && (
-          <p className="cart-item-instructions">{item.specialInstructions}</p>
-        )}
-      </div>
-      <div className="cart-item-controls">
-        <div className="quantity-controls">
-          <Button
-            variant="outline"
-            size="small"
-            onClick={() => onDecrease(item.productId)}
+    <div className="cart-item d-flex align-items-center mb-3 pb-3 border-bottom">
+      <img
+        src={product.image}
+        alt={product.name}
+        className="cart-item-img rounded me-3"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.src = 'https://placehold.co/100x100?text=Plato';
+        }}
+      />
+
+      <div className="flex-grow-1">
+        <div className="d-flex justify-content-between align-items-start mb-1">
+          <h6 className="mb-0 text-truncate-2 small fw-bold">{product.name}</h6>
+          <button
+            className="btn btn-link text-danger p-0 ms-2"
+            onClick={() => removeItem(product.id)}
+            aria-label="Eliminar producto"
           >
-            -
-          </Button>
-          <span className="quantity">{item.quantity}</span>
-          <Button
-            variant="outline"
-            size="small"
-            onClick={() => onIncrease(item.productId)}
-          >
-            +
-          </Button>
+            <i className="bi bi-trash"></i>
+          </button>
         </div>
-        <Button
-          variant="danger"
-          size="small"
-          onClick={() => onRemove(item.productId)}
-        >
-          Eliminar
-        </Button>
+
+        <div className="d-flex justify-content-between align-items-end">
+          <div className="quantity-controls d-flex align-items-center border rounded-pill px-2 py-1">
+            <button
+              className="btn btn-sm p-0"
+              onClick={() => updateQuantity(product.id, quantity - 1)}
+              disabled={quantity <= 1}
+            >
+              <i className="bi bi-dash"></i>
+            </button>
+            <span className="mx-2 small fw-bold">{quantity}</span>
+            <button
+              className="btn btn-sm p-0"
+              onClick={() => updateQuantity(product.id, quantity + 1)}
+            >
+              <i className="bi bi-plus"></i>
+            </button>
+          </div>
+
+          <span className="fw-bold text-primary">
+            ${(product.price * quantity).toFixed(2)}
+          </span>
+        </div>
       </div>
     </div>
   );
 };
-

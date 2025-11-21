@@ -1,0 +1,26 @@
+.cart-floating-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 64px;
+  height: 64px;
+  z-index: 1030;
+  transition: transform 0.2s ease;
+}
+
+.cart-floating-btn:hover {
+  transform: scale(1.1);
+}
+
+.cart-floating-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 576px) {
+  .cart-floating-btn {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 56px;
+    height: 56px;
+  }
+}

@@ -2,6 +2,8 @@ import { Outlet } from 'react-router-dom';
 import './PublicLayout.css';
 import { PublicHeader } from './components/PublicHeader';
 import { PublicFooter } from './components/PublicFooter';
+import { CartFloatingButton } from '../../../../modules/cart/components/CartFloatingButton/CartFloatingButton';
+import { CartDrawer } from '../../../../modules/cart/components/CartDrawer/CartDrawer';
 
 const PublicLayout = () => {
   return (
@@ -10,6 +12,8 @@ const PublicLayout = () => {
       <main className="page-content">
         <Outlet />
       </main>
+      <CartFloatingButton />
+      <CartDrawer />
       <PublicFooter />
     </div>
   );

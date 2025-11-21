@@ -1,0 +1,37 @@
+.cart-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.cart-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
+  z-index: 1050;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.cart-drawer.open {
+  transform: translateX(0);
+}
+
+.cart-body {
+  scrollbar-width: thin;
+}
