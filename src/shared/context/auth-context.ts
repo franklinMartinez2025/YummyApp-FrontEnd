@@ -1,11 +1,10 @@
 import { createContext } from 'react';
-import { UserRole } from '../../core/domain/enums/user-role';
 
 export interface AuthUser {
   id: string;
   fullName: string;
   email: string;
-  roles: UserRole;
+  roles: string[];
   refreshToken?: string;
 }
 

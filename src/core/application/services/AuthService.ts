@@ -33,7 +33,7 @@ export class AuthService {
       password,
       fullName,
       phoneNumber,
-      role,
+      roleName: role,
     });
   }
 
