@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { AuthProvider } from '../../shared/context/AuthProvider';
 import { CartProvider } from '../../modules/client/cart/context/CartContext';
+import { AuthModalProvider } from '../../modules/shared/auth/context/AuthModalContext';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -9,7 +10,9 @@ interface AppProvidersProps {
 export const AppProviders = ({ children }: AppProvidersProps) => (
   <AuthProvider>
     <CartProvider>
-      {children}
+      <AuthModalProvider>
+        {children}
+      </AuthModalProvider>
     </CartProvider>
   </AuthProvider>
 );

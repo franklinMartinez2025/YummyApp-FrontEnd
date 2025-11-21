@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
-import type { CartItemDto } from '../../../core/application/dtos/cart/CartItemDto';
-import type { ProductDto } from '../../../core/application/dtos/restaurant/ProductDto';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
+import type { CartItemDto } from '../../../../core/application/dtos/cart/CartDto';
+import type { ProductDto } from '../../../../core/application/dtos/restaurant/ProductDto';
+import { useAuthContext } from '../../../../shared/context/useAuthContext';
 
 interface CartContextType {
     items: CartItemDto[];
@@ -21,6 +22,13 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [items, setItems] = useState<CartItemDto[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const { isAuthenticated } = useAuthContext();
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setItems([]);
+        }
+    }, [isAuthenticated]);
 
     const addItem = useCallback((product: ProductDto, quantity = 1) => {
         setItems((prevItems) => {
@@ -32,7 +40,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 return newItems;
             }
 
-            return [...prevItems, { product, quantity }];
+            return [...prevItems, {
+                product,
+                quantity,
+                productId: product.id,
+                subtotal: product.price * quantity
+            }];
         });
         setIsOpen(true); // Open cart when adding item
     }, []);
@@ -49,7 +62,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
         setItems((prevItems) =>
             prevItems.map((item) =>
-                item.product.id === productId ? { ...item, quantity } : item
+                item.product.id === productId ? { ...item, quantity, subtotal: item.product.price * quantity } : item
             )
         );
     }, [removeItem]);

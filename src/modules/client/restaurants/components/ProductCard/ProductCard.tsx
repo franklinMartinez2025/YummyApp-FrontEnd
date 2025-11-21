@@ -2,6 +2,8 @@ import type { ProductDto } from "../../../../../core/application/dtos/order/Prod
 import './ProductCard.css';
 
 import { useCart } from '../../../../client/cart/context/CartContext';
+import { useAuthContext } from '../../../../../shared/context/useAuthContext';
+import { useAuthModal } from '../../../../../modules/shared/auth/context/AuthModalContext';
 
 interface ProductCardProps {
     product: ProductDto;
@@ -10,6 +12,8 @@ interface ProductCardProps {
 export const ProductCard = ({ product }: ProductCardProps) => {
     const { name, description, price, image } = product;
     const { addItem } = useCart();
+    const { isAuthenticated } = useAuthContext();
+    const { openAuthModal } = useAuthModal();
 
     return (
         <div className="card h-100 product-card shadow-sm border-0">
@@ -38,7 +42,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
                         <button
                             className="btn btn-outline-primary btn-sm w-100 mt-auto rounded-pill"
-                            onClick={() => addItem(product)}
+                            onClick={() => {
+                                if (!isAuthenticated) {
+                                    openAuthModal('login');
+                                    return;
+                                }
+                                addItem(product);
+                            }}
                         >
                             <i className="bi bi-plus-lg me-1"></i>
                             Agregar
