@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useRoles } from '../hooks/useRoles';
 import { useAuthContext } from '../../../shared/context/useAuthContext';
 
 const RegisterPage = () => {
@@ -9,12 +10,20 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('Client'); // Default role
+  const [role, setRole] = useState('');
   const [passError, setPassError] = useState('');
 
   const { register, login, isLoading, error } = useAuth();
+  const { roles, isLoading: isLoadingRoles, error: rolesError } = useRoles();
   const { login: contextLogin } = useAuthContext();
   const navigate = useNavigate();
+
+  // Establecer el primer rol como valor por defecto cuando se carguen los roles
+  useEffect(() => {
+    if (roles.length > 0 && !role) {
+      setRole(roles[0].name);
+    }
+  }, [roles, role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +67,12 @@ const RegisterPage = () => {
       {passError && (
         <div className="alert alert-warning border-0 bg-warning bg-opacity-25 text-white mb-4" role="alert">
           <i className="bi bi-exclamation-triangle me-2"></i> {passError}
+        </div>
+      )}
+
+      {rolesError && (
+        <div className="alert alert-danger border-0 bg-danger bg-opacity-25 text-white mb-4" role="alert">
+          <i className="bi bi-exclamation-circle me-2"></i> {rolesError}
         </div>
       )}
 
@@ -108,11 +123,24 @@ const RegisterPage = () => {
             value={role}
             onChange={(e) => setRole(e.target.value)}
             aria-label="Seleccionar Rol"
+            disabled={isLoadingRoles || roles.length === 0}
+            required
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              color: 'white'
+            }}
           >
-            <option value="Client">Cliente</option>
-            <option value="Admin">Administrador</option>
-            <option value="RestaurantOwner">Dueño de Restaurante</option>
-            <option value="Delivery">Repartidor</option>
+            {isLoadingRoles ? (
+              <option>Cargando roles...</option>
+            ) : roles.length === 0 ? (
+              <option>No hay roles disponibles</option>
+            ) : (
+              roles.map((roleItem) => (
+                <option key={roleItem.id} value={roleItem.name}>
+                  {roleItem.name}
+                </option>
+              ))
+            )}
           </select>
           <label htmlFor="floatingRole">Rol</label>
         </div>

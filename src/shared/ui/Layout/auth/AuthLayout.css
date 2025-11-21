@@ -77,25 +77,153 @@
 .form-floating > .form-control {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #ffffff;
   border-radius: 12px;
+  font-weight: 400;
 }
 
 .form-floating > .form-control:focus {
   background: rgba(255, 255, 255, 0.15);
   border-color: #ff4b2b;
   box-shadow: 0 0 0 4px rgba(255, 75, 43, 0.2);
-  color: white;
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.form-floating > .form-control:not(:placeholder-shown) {
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.form-floating > .form-select {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  border-radius: 12px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-weight: 400;
+}
+
+.form-floating > .form-select:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: #ff4b2b;
+  box-shadow: 0 0 0 4px rgba(255, 75, 43, 0.2);
+  color: #ffffff !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+  outline: none;
+  font-weight: 400;
+}
+
+.form-floating > .form-select:not([value=""]) {
+  color: #ffffff !important;
+  font-weight: 400;
+}
+
+.form-floating > .form-select option {
+  background: rgba(0, 0, 0, 0.95) !important;
+  color: white !important;
+  padding: 10px;
+}
+
+.form-floating > .form-select option:checked,
+.form-floating > .form-select option:focus {
+  background: rgba(255, 75, 43, 0.3) !important;
+  color: white !important;
+}
+
+.form-floating > .form-select:disabled {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  opacity: 0.6;
 }
 
 .form-floating > label {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
+  font-size: 1rem;
 }
 
 .form-floating > .form-control:focus ~ label,
 .form-floating > .form-control:not(:placeholder-shown) ~ label {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  font-size: 0.85rem;
   transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.form-floating > .form-select:focus ~ label,
+.form-floating > .form-select:not([value=""]) ~ label,
+.form-floating > .form-select:has(option:checked:not([value=""])) ~ label {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  font-size: 0.85rem;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+/* Prevenir cambio de fondo en campos autocompletados */
+.form-floating > .form-control:-webkit-autofill,
+.form-floating > .form-control:-webkit-autofill:hover,
+.form-floating > .form-control:-webkit-autofill:focus,
+.form-floating > .form-control:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.1) inset !important;
+  -webkit-text-fill-color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.form-floating > .form-select:-webkit-autofill,
+.form-floating > .form-select:-webkit-autofill:hover,
+.form-floating > .form-select:-webkit-autofill:focus,
+.form-floating > .form-select:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.1) inset !important;
+  -webkit-text-fill-color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Asegurar que el select mantenga el fondo transparente en todos los estados */
+.form-floating > .form-select,
+.form-floating > .form-select:hover,
+.form-floating > .form-select:active,
+.form-floating > .form-select:focus,
+.form-floating > .form-select:not(:disabled):not([readonly]),
+select.form-select,
+select.form-select:hover,
+select.form-select:active,
+select.form-select:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+/* Estilos para el texto seleccionado dentro del select */
+.form-floating > .form-select::-ms-value,
+select.form-select::-ms-value {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.form-floating > .form-select::-webkit-select-value,
+select.form-select::-webkit-select-value {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: white !important;
+}
+
+/* Forzar fondo transparente en el select incluso cuando tiene valor */
+select.form-select[value]:not([value=""]),
+.form-floating > select.form-select[value]:not([value=""]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
 }
 
 .btn-auth {
