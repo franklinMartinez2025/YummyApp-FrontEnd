@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../../context/useAuthContext';
 import { RoleSelectionModal } from '../../../../../modules/shared/auth/components/RoleSelectionModal';
-import '../styles/AdminHeader.css';
+import '../styles/RestaurantHeader.css';
 
-export const AdminHeader = () => {
+export const RestaurantHeader = () => {
   const { user, logout, setActiveRole } = useAuthContext();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -12,11 +12,10 @@ export const AdminHeader = () => {
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Simulación de notificaciones (luego se puede conectar a un servicio real)
+  // Simulación de notificaciones
   const notifications = [
-    { id: 1, message: 'Nuevo restaurante registrado', time: 'Hace 5 min', read: false },
-    { id: 2, message: 'Orden #1234 requiere atención', time: 'Hace 15 min', read: false },
-    { id: 3, message: 'Reporte mensual disponible', time: 'Hace 1 hora', read: true },
+    { id: 1, message: 'Nuevo pedido recibido #1235', time: 'Hace 2 min', read: false },
+    { id: 2, message: 'Repartidor asignado a orden #1234', time: 'Hace 10 min', read: false },
   ];
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -42,48 +41,48 @@ export const AdminHeader = () => {
 
   return (
     <>
-      <header className="admin-header">
-        <div className="admin-header-content">
+      <header className="restaurant-header">
+        <div className="restaurant-header-content">
           {/* Búsqueda Global */}
-          <div className="admin-search">
-            <i className="bi bi-search admin-search-icon"></i>
+          <div className="restaurant-search">
+            <i className="bi bi-search restaurant-search-icon"></i>
             <input
               type="text"
-              className="admin-search-input"
-              placeholder="Buscar restaurantes, usuarios, órdenes..."
+              className="restaurant-search-input"
+              placeholder="Buscar pedidos, platos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {/* Acciones del Header */}
-          <div className="admin-header-actions">
+          <div className="restaurant-header-actions">
             {/* Notificaciones */}
-            <div className="admin-notifications">
+            <div className="restaurant-notifications">
               <button
-                className="admin-header-btn"
+                className="restaurant-header-btn"
                 onClick={() => setShowNotifications(!showNotifications)}
                 aria-label="Notificaciones"
               >
                 <i className="bi bi-bell"></i>
                 {unreadCount > 0 && (
-                  <span className="admin-badge">{unreadCount}</span>
+                  <span className="restaurant-badge">{unreadCount}</span>
                 )}
               </button>
               {showNotifications && (
                 <>
                   <div
-                    className="admin-dropdown-overlay"
+                    className="restaurant-dropdown-overlay"
                     onClick={() => setShowNotifications(false)}
                   />
-                  <div className="admin-dropdown admin-notifications-dropdown">
-                    <div className="admin-dropdown-header">
+                  <div className="restaurant-dropdown restaurant-notifications-dropdown">
+                    <div className="restaurant-dropdown-header">
                       <h6>Notificaciones</h6>
-                      <span className="admin-badge-small">{unreadCount} nuevas</span>
+                      <span className="restaurant-badge-small">{unreadCount} nuevas</span>
                     </div>
-                    <div className="admin-dropdown-content">
+                    <div className="restaurant-dropdown-content">
                       {notifications.length === 0 ? (
-                        <div className="admin-dropdown-empty">
+                        <div className="restaurant-dropdown-empty">
                           <i className="bi bi-bell-slash"></i>
                           <p>No hay notificaciones</p>
                         </div>
@@ -91,21 +90,21 @@ export const AdminHeader = () => {
                         notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className={`admin-notification-item ${!notification.read ? 'unread' : ''}`}
+                            className={`restaurant-notification-item ${!notification.read ? 'unread' : ''}`}
                           >
-                            <div className="admin-notification-icon">
+                            <div className="restaurant-notification-icon">
                               <i className="bi bi-info-circle"></i>
                             </div>
-                            <div className="admin-notification-content">
-                              <p className="admin-notification-message">{notification.message}</p>
-                              <span className="admin-notification-time">{notification.time}</span>
+                            <div className="restaurant-notification-content">
+                              <p className="restaurant-notification-message">{notification.message}</p>
+                              <span className="restaurant-notification-time">{notification.time}</span>
                             </div>
                           </div>
                         ))
                       )}
                     </div>
-                    <div className="admin-dropdown-footer">
-                      <button className="admin-dropdown-link">Ver todas las notificaciones</button>
+                    <div className="restaurant-dropdown-footer">
+                      <button className="restaurant-dropdown-link">Ver todas las notificaciones</button>
                     </div>
                   </div>
                 </>
@@ -113,54 +112,50 @@ export const AdminHeader = () => {
             </div>
 
             {/* Menú de Usuario */}
-            <div className="admin-user-menu">
+            <div className="restaurant-user-menu">
               <button
-                className="admin-user-btn"
+                className="restaurant-user-btn"
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 aria-label="Menú de usuario"
               >
-                <div className="admin-user-avatar">
-                  {user?.fullName?.charAt(0).toUpperCase() || 'A'}
+                <div className="restaurant-user-avatar">
+                  {user?.fullName?.charAt(0).toUpperCase() || 'R'}
                 </div>
-                <div className="admin-user-info">
-                  <span className="admin-user-name">{user?.fullName || 'Administrador'}</span>
-                  <span className="admin-user-role">Administrador General</span>
+                <div className="restaurant-user-info">
+                  <span className="restaurant-user-name">{user?.fullName || 'Restaurante'}</span>
+                  <span className="restaurant-user-role">Administrador</span>
                 </div>
-                <i className="bi bi-chevron-down admin-user-chevron"></i>
+                <i className="bi bi-chevron-down restaurant-user-chevron"></i>
               </button>
               {showUserMenu && (
                 <>
                   <div
-                    className="admin-dropdown-overlay"
+                    className="restaurant-dropdown-overlay"
                     onClick={() => setShowUserMenu(false)}
                   />
-                  <div className="admin-dropdown admin-user-dropdown">
-                    <div className="admin-dropdown-content">
-                      <div className="admin-user-dropdown-header">
-                        <div className="admin-user-avatar-large">
-                          {user?.fullName?.charAt(0).toUpperCase() || 'A'}
+                  <div className="restaurant-dropdown restaurant-user-dropdown">
+                    <div className="restaurant-dropdown-content">
+                      <div className="restaurant-user-dropdown-header">
+                        <div className="restaurant-user-avatar-large">
+                          {user?.fullName?.charAt(0).toUpperCase() || 'R'}
                         </div>
                         <div>
-                          <p className="admin-user-name-large">{user?.fullName || 'Administrador'}</p>
-                          <p className="admin-user-email">{user?.email || ''}</p>
+                          <p className="restaurant-user-name-large">{user?.fullName || 'Restaurante'}</p>
+                          <p className="restaurant-user-email">{user?.email || ''}</p>
                         </div>
                       </div>
-                      <div className="admin-dropdown-divider"></div>
-                      <a href="/admin/profile" className="admin-dropdown-item">
+                      <div className="restaurant-dropdown-divider"></div>
+                      <a href="/restaurant/profile" className="restaurant-dropdown-item">
                         <i className="bi bi-person"></i>
-                        <span>Mi Perfil</span>
+                        <span>Perfil del Restaurante</span>
                       </a>
-                      <a href="/admin/settings" className="admin-dropdown-item">
+                      <a href="/restaurant/settings" className="restaurant-dropdown-item">
                         <i className="bi bi-gear"></i>
                         <span>Configuración</span>
                       </a>
-                      <a href="/" className="admin-dropdown-item" target="_blank" rel="noopener noreferrer">
-                        <i className="bi bi-house"></i>
-                        <span>Ver Sitio Web</span>
-                      </a>
                       {user?.roles && user.roles.length > 1 && (
                         <button
-                          className="admin-dropdown-item"
+                          className="restaurant-dropdown-item"
                           onClick={() => {
                             setIsRoleModalOpen(true);
                             setShowUserMenu(false);
@@ -170,9 +165,9 @@ export const AdminHeader = () => {
                           <span>Cambiar Rol</span>
                         </button>
                       )}
-                      <div className="admin-dropdown-divider"></div>
+                      <div className="restaurant-dropdown-divider"></div>
                       <button
-                        className="admin-dropdown-item admin-dropdown-item-danger"
+                        className="restaurant-dropdown-item restaurant-dropdown-item-danger"
                         onClick={() => {
                           logout();
                           window.location.href = '/';
@@ -201,4 +196,3 @@ export const AdminHeader = () => {
     </>
   );
 };
-

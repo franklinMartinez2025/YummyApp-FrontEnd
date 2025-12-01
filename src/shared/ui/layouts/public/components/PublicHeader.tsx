@@ -23,10 +23,12 @@ export const PublicHeader = () => {
     closeNav();
 
     const normalizedRole = role.toLowerCase();
-    if (normalizedRole.includes('administrador general')) {
+    if (normalizedRole.includes('administrador general') || normalizedRole.includes('admin')) {
       navigate('/admin/dashboard');
-    } else if (normalizedRole.includes('administrador restaurante')) {
+    } else if (normalizedRole.includes('restaurante') || normalizedRole.includes('restaurant')) {
       navigate('/restaurant/dashboard');
+    } else if (normalizedRole.includes('repartidor') || normalizedRole.includes('delivery')) {
+      navigate('/delivery/dashboard');
     } else {
       navigate('/');
     }

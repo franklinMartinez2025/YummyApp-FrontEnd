@@ -1,4 +1,4 @@
-import '../../styles/AdminPages.css';
+import '../../../../modules/admin/dashboard/styles/AdminPages.css';
 
 const AdminSettingsPage = () => {
   return (

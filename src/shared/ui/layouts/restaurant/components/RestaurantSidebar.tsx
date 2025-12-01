@@ -44,6 +44,11 @@ export const RestaurantSidebar = () => {
       label: 'Pedidos',
     },
     {
+      path: '/restaurant/drivers',
+      icon: 'bi-bicycle',
+      label: 'Repartidores',
+    },
+    {
       path: '/restaurant/settings',
       icon: 'bi-gear',
       label: 'Configuración',

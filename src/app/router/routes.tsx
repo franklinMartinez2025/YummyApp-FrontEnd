@@ -17,13 +17,17 @@ import AdminUsersPage from '../../modules/admin/users/pages/AdminUsersPage';
 import AdminOrdersPage from '../../modules/admin/orders/pages/AdminOrdersPage';
 import AdminReportsPage from '../../modules/admin/reports/pages/AdminReportsPage';
 import AdminSettingsPage from '../../modules/admin/settings/pages/AdminSettingsPage';
-import RestaurantDashboardPage from '../../modules/restaurant/pages/RestaurantDashboardPage';
-import RestaurantMenuPage from '../../modules/restaurant/pages/RestaurantMenuPage';
-import RestaurantFoodsPage from '../../modules/restaurant/pages/RestaurantFoodsPage';
-import RestaurantDrinksPage from '../../modules/restaurant/pages/RestaurantDrinksPage';
-import RestaurantDessertsPage from '../../modules/restaurant/pages/RestaurantDessertsPage';
-import RestaurantOrdersPage from '../../modules/restaurant/pages/RestaurantOrdersPage';
-import RestaurantSettingsPage from '../../modules/restaurant/pages/RestaurantSettingsPage';
+import RestaurantDashboardPage from '../../modules/restaurant/dashboard/pages/RestaurantDashboardPage';
+import RestaurantMenuPage from '../../modules/restaurant/menus/pages/RestaurantMenuPage';
+import RestaurantFoodsPage from '../../modules/restaurant/foods/pages/RestaurantFoodsPage';
+import RestaurantDrinksPage from '../../modules/restaurant/drinks/pages/RestaurantDrinksPage';
+import RestaurantDessertsPage from '../../modules/restaurant/desserts/pages/RestaurantDessertsPage';
+import RestaurantOrdersPage from '../../modules/restaurant/orders/pages/RestaurantOrdersPage';
+import RestaurantDriversPage from '../../modules/restaurant/drivers/pages/RestaurantDriversPage';
+import RestaurantSettingsPage from '../../modules/restaurant/settings/pages/RestaurantSettingsPage';
+import DeliveryDashboardPage from '../../modules/delivery/dashboard/pages/DeliveryDashboardPage';
+import AvailableOrdersPage from '../../modules/delivery/available-orders/pages/AvailableOrdersPage';
+import MyDeliveriesPage from '../../modules/delivery/my-deliveries/pages/MyDeliveriesPage';
 
 import { RoleAccessGuard } from './guards/RoleAccessGuard';
 
@@ -60,7 +64,13 @@ export const AppRouter = () => (
           <Route path="/restaurant/drinks" element={<RestaurantDrinksPage />} />
           <Route path="/restaurant/desserts" element={<RestaurantDessertsPage />} />
           <Route path="/restaurant/orders" element={<RestaurantOrdersPage />} />
+          <Route path="/restaurant/drivers" element={<RestaurantDriversPage />} />
           <Route path="/restaurant/settings" element={<RestaurantSettingsPage />} />
+          
+          {/* Delivery Routes - Solo para repartidores */}
+          <Route path="/delivery/dashboard" element={<DeliveryDashboardPage />} />
+          <Route path="/delivery/available" element={<AvailableOrdersPage />} />
+          <Route path="/delivery/my-deliveries" element={<MyDeliveriesPage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
