@@ -9,7 +9,7 @@ interface LoginFormProps {
     onRegisterClick?: () => void;
 }
 
-/** Formulario de inicio de sesión que maneja autenticación y selección de roles */
+/** Formulario de login con manejo de autenticación y selección de rol */
 export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,14 +20,11 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
     const [showRoleSelection, setShowRoleSelection] = useState(false);
     const [userRoles, setUserRoles] = useState<string[]>([]);
 
-    /** Maneja la redirección basada en el rol seleccionado */
+    /** Redirige según el rol elegido en usuarios con roles múltiples */
     const handleRoleRedirect = (role: string) => {
         const normalizedRole = role.toLowerCase();
-        
-        // Set the active role in context
-        if (setActiveRole) {
-            setActiveRole(role);
-        }
+
+        if (setActiveRole) setActiveRole(role);
 
         if (normalizedRole.includes('administrador general')) {
             navigate('/admin/dashboard');
@@ -37,12 +34,10 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
             navigate('/');
         }
 
-        if (onSuccess) {
-            onSuccess();
-        }
+        onSuccess?.();
     };
 
-    /** Maneja el envío del formulario de login */
+    /** Procesa el envío del formulario y autenticación */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const result = await login(email, password);
@@ -55,50 +50,46 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
                 roles: result.user.roles,
                 refreshToken: result.refreshToken
             };
+
             contextLogin(userForContext, result.token);
 
-            // Check for multiple roles
-            if (result.user.roles && result.user.roles.length > 1) {
+            /** Mostrar selector si tiene múltiples roles */
+            if (result.user.roles?.length > 1) {
                 setUserRoles(result.user.roles);
                 setShowRoleSelection(true);
-                return; 
+                return;
             }
 
-            // Single role logic
-            if (result.user.roles && result.user.roles.length === 1) {
-                const singleRole = result.user.roles[0];
-                if (setActiveRole) {
-                    setActiveRole(singleRole);
-                }
+            /** Caso de único rol */
+            if (result.user.roles?.length === 1) {
+                const role = result.user.roles[0];
+                setActiveRole?.(role);
             }
 
-            if (onSuccess) {
-                onSuccess();
-            } else {
-                // Redirigir según el rol (existing logic for single role)
-                const hasAdminRole = result.user.roles?.some((role: string) =>
-                    role.toLowerCase().includes('administrador') || role.toLowerCase().includes('admin')
+            /** Redirección automática según rol único */
+            if (!onSuccess) {
+                const hasAdminRole = result.user.roles?.some(r =>
+                    r.toLowerCase().includes('administrador') || r.toLowerCase().includes('admin')
                 );
-                const hasRestaurantRole = result.user.roles?.some((role: string) =>
-                    role.toLowerCase().includes('restaurante') || role.toLowerCase().includes('restaurant')
+                const hasRestaurantRole = result.user.roles?.some(r =>
+                    r.toLowerCase().includes('restaurante') || r.toLowerCase().includes('restaurant')
                 );
 
-                if (hasAdminRole) {
-                    navigate('/admin/dashboard');
-                } else if (hasRestaurantRole) {
-                    navigate('/restaurant/dashboard');
-                } else {
-                    navigate('/');
-                }
+                if (hasAdminRole) navigate('/admin/dashboard');
+                else if (hasRestaurantRole) navigate('/restaurant/dashboard');
+                else navigate('/');
             }
+
+            onSuccess?.();
         }
     };
 
+    /** Vista de selección de rol cuando el usuario tiene varios */
     if (showRoleSelection) {
         return (
             <RoleSelection 
-                roles={userRoles} 
-                onSelect={handleRoleRedirect} 
+                roles={userRoles}
+                onSelect={handleRoleRedirect}
             />
         );
     }
@@ -194,3 +185,4 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
         </div>
     );
 };
+

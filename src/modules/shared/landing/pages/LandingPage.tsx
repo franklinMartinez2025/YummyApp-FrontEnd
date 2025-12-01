@@ -1,6 +1,6 @@
 import { AboutSection } from '../components/AboutSection';
 import { HeroSection, type HeroSlide } from '../components/HeroSection';
-import './LandingPage.css';
+import '../styles/LandingPage.css';
 
 const heroSlides: HeroSlide[] = [
   {

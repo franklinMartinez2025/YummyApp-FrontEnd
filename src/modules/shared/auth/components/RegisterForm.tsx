@@ -9,6 +9,7 @@ interface RegisterFormProps {
     onLoginClick?: () => void;
 }
 
+/** Formulario de registro con manejo de creación de usuario y login automático */
 export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -23,12 +24,14 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
     const { login: contextLogin } = useAuthContext();
     const navigate = useNavigate();
 
+    /** Selecciona automáticamente el primer rol disponible */
     useEffect(() => {
         if (roles.length > 0 && !roleName) {
             setRole(roles[0].name);
         }
     }, [roles, roleName]);
 
+    /** Procesa el registro y luego inicia sesión automáticamente */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPassError('');
@@ -42,8 +45,10 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
 
         if (result.success) {
             const loginResult = await login(email, password);
+
             if (loginResult.success && loginResult.user) {
                 const token = localStorage.getItem('auth_token') || '';
+
                 const userForContext = {
                     id: loginResult.user.email,
                     fullName: loginResult.user.fullName,
@@ -53,10 +58,10 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
 
                 contextLogin(userForContext, token);
 
+                /** Ejecuta callback externo o redirige según rol */
                 if (onSuccess) {
                     onSuccess();
                 } else {
-                    // Redirigir según el rol
                     const hasAdminRole = loginResult.user.roles?.some((role: string) =>
                         role.toLowerCase().includes('administrador') || role.toLowerCase().includes('admin')
                     );
@@ -64,13 +69,9 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
                         role.toLowerCase().includes('restaurante') || role.toLowerCase().includes('restaurant')
                     );
 
-                    if (hasAdminRole) {
-                        navigate('/admin/dashboard');
-                    } else if (hasRestaurantRole) {
-                        navigate('/restaurant/dashboard');
-                    } else {
-                        navigate('/');
-                    }
+                    if (hasAdminRole) navigate('/admin/dashboard');
+                    else if (hasRestaurantRole) navigate('/restaurant/dashboard');
+                    else navigate('/');
                 }
             }
         }

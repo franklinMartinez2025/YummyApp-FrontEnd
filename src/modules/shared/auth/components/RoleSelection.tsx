@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/RoleSelection.css';
 
 interface RoleSelectionProps {
     roles: string[];
@@ -13,8 +14,19 @@ export const RoleSelection: React.FC<RoleSelectionProps> = ({ roles, onSelect })
         const normalizedRole = role.toLowerCase();
         if (normalizedRole.includes('admin')) return 'bi-shield-lock';
         if (normalizedRole.includes('restaurante')) return 'bi-shop';
+        if (normalizedRole.includes('repartidor')) return 'bi-truck';
         if (normalizedRole.includes('cliente')) return 'bi-person';
         return 'bi-person-badge';
+    };
+
+    /** Obtiene una descripción breve para el rol */
+    const getRoleDescription = (role: string) => {
+        const normalizedRole = role.toLowerCase();
+        if (normalizedRole.includes('admin')) return 'Gestión total del sistema';
+        if (normalizedRole.includes('restaurante')) return 'Administra tu negocio';
+        if (normalizedRole.includes('repartidor')) return 'Realiza entregas';
+        if (normalizedRole.includes('cliente')) return 'Realiza pedidos y disfruta';
+        return 'Acceso a tu perfil';
     };
 
     /** Formatea el nombre del rol para mostrarlo */
@@ -24,10 +36,10 @@ export const RoleSelection: React.FC<RoleSelectionProps> = ({ roles, onSelect })
     };
 
     return (
-        <div className="role-selection-container text-center animate__animated animate__fadeIn">
-            <div className="mb-4">
-                <div className="icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', borderRadius: '50%' }}>
-                    <i className="bi bi-person-bounding-box fs-2"></i>
+        <div className="role-selection-container text-center animate-fade-in">
+            <div className="role-selection-header">
+                <div className="role-selection-icon-wrapper">
+                    <i className="bi bi-person-bounding-box"></i>
                 </div>
                 <h4 className="text-white fw-bold mb-2">Selecciona tu perfil</h4>
                 <p className="text-white-50 small">
@@ -37,23 +49,29 @@ export const RoleSelection: React.FC<RoleSelectionProps> = ({ roles, onSelect })
             </div>
 
             <div className="d-grid gap-3">
-                {roles.map((role) => (
+                {roles.map((role, index) => (
                     <button
                         key={role}
                         onClick={() => onSelect(role)}
-                        className="btn btn-outline-light p-3 d-flex align-items-center justify-content-between hover-scale"
-                        style={{ border: '1px solid rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.05)' }}
+                        className="role-card-btn role-item-animate"
+                        style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="rounded-circle bg-dark d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                                <i className={`bi ${getRoleIcon(role)} text-primary`}></i>
+                        <div className="role-card-content">
+                            <div className="role-icon-box">
+                                <i className={`bi ${getRoleIcon(role)}`}></i>
                             </div>
-                            <span className="fw-medium">{getRoleLabel(role)}</span>
+                            <div className="role-info">
+                                <span className="role-name">{getRoleLabel(role)}</span>
+                                <span className="role-desc">{getRoleDescription(role)}</span>
+                            </div>
                         </div>
-                        <i className="bi bi-chevron-right text-white-50"></i>
+                        <div className="role-arrow">
+                            <i className="bi bi-chevron-right"></i>
+                        </div>
                     </button>
                 ))}
             </div>
         </div>
     );
 };
+
