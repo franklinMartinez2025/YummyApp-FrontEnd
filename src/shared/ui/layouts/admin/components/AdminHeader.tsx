@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../../context/useAuthContext';
 import { RoleSelectionModal } from '../../../../../modules/shared/auth/components/RoleSelectionModal';
-import '../AdminHeader.css';
+import '../styles/AdminHeader.css';
 
 export const AdminHeader = () => {
   const { user, logout, setActiveRole } = useAuthContext();

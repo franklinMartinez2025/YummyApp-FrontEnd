@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { RestaurantSidebar } from './components/RestaurantSidebar';
-import './RestaurantLayout.css';
+import './styles/RestaurantLayout.css';
 
 /** Layout principal para el panel de restaurante */
 const RestaurantLayout = () => {

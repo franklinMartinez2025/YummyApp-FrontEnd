@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import './PublicLayout.css';
+import './styles/PublicLayout.css';
 import { PublicHeader } from './components/PublicHeader';
 import { PublicFooter } from './components/PublicFooter';
 import { CartFloatingButton } from '../../../../modules/client/cart/components/CartFloatingButton/CartFloatingButton';

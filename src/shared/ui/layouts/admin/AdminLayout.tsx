@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { AdminSidebar } from './components/AdminSidebar';
 import { AdminHeader } from './components/AdminHeader';
-import './AdminLayout.css';
+import './styles/AdminLayout.css';
 
 /** Layout principal para el panel de administración */
 const AdminLayout = () => {

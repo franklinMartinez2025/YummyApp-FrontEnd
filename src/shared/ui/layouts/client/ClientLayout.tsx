@@ -3,7 +3,7 @@ import { PublicHeader } from '../public/components/PublicHeader';
 import { PublicFooter } from '../public/components/PublicFooter';
 import { CartFloatingButton } from '../../../../modules/client/cart/components/CartFloatingButton/CartFloatingButton';
 import { CartDrawer } from '../../../../modules/client/cart/components/CartDrawer/CartDrawer';
-import '../public/PublicLayout.css';
+import '../public/styles/PublicLayout.css';
 
 /** Layout principal para la vista de cliente (pública) */
 export const ClientLayout = () => {

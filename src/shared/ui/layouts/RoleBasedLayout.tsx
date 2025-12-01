@@ -3,38 +3,37 @@ import AdminLayout from './admin/AdminLayout';
 import RestaurantLayout from './restaurant/RestaurantLayout';
 import ClientLayout from './client/ClientLayout';
 
-/**
- * Layout basado en roles que determina qué layout mostrar según el rol del usuario
- */
-/** Layout dinámico que renderiza el layout correspondiente según el rol del usuario */
+/** Renderiza el layout correspondiente según el rol del usuario */
 export const RoleBasedLayout = () => {
   const { user, isAuthenticated } = useAuthContext();
 
-  // Si no está autenticado o no tiene roles, mostrar layout de cliente
+  /** Si no hay sesión o roles, usar layout de cliente */
   if (!isAuthenticated || !user || !user.roles || user.roles.length === 0) {
     return <ClientLayout />;
   }
 
-  // Determinar qué layout mostrar según el rol
-  const hasAdminRole = user.roles.some(role => 
-    role.toLowerCase().includes('administrador') || 
+  /** Verifica si posee rol administrativo */
+  const hasAdminRole = user.roles.some(role =>
+    role.toLowerCase().includes('administrador') ||
     role.toLowerCase().includes('admin')
   );
-  
-  const hasRestaurantRole = user.roles.some(role => 
-    role.toLowerCase().includes('restaurante') || 
+
+  /** Verifica si posee rol de restaurante */
+  const hasRestaurantRole = user.roles.some(role =>
+    role.toLowerCase().includes('restaurante') ||
     role.toLowerCase().includes('restaurant')
   );
 
+  /** Layout para administrador */
   if (hasAdminRole) {
     return <AdminLayout />;
   }
 
+  /** Layout para administrador de restaurante */
   if (hasRestaurantRole) {
     return <RestaurantLayout />;
   }
 
-  // Por defecto, mostrar layout de cliente
+  /** Layout por defecto (cliente) */
   return <ClientLayout />;
 };
-

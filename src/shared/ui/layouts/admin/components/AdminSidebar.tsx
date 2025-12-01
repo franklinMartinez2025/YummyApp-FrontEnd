@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuthContext } from '../../../../context/useAuthContext';
-import '../Sidebar.css';
+import '../styles/Sidebar.css';
 
 export const AdminSidebar = () => {
   const location = useLocation();

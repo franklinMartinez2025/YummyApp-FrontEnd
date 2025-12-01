@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import PublicLayout from '../../shared/ui/layouts/public/PublicLayout';
 import { RoleBasedLayout } from '../../shared/ui/layouts/RoleBasedLayout';
-import { AuthLayout } from '../../shared/ui/layouts/auth/AuthLayout';
+import { AuthLayout } from '../../shared/ui/layouts/auth/components/AuthLayout';
 import { ProtectedRoute } from '../../shared/components/ProtectedRoute';
 import LandingPage from '../../modules/shared/landing/pages/LandingPage';
 import NotFoundPage from '../../modules/shared/pages/NotFoundPage';
