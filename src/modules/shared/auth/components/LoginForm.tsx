@@ -2,19 +2,47 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useAuthContext } from '../../../../shared/context/useAuthContext';
+import { RoleSelection } from './RoleSelection';
 
 interface LoginFormProps {
     onSuccess?: () => void;
     onRegisterClick?: () => void;
 }
 
+/** Formulario de inicio de sesión que maneja autenticación y selección de roles */
 export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, isLoading, error } = useAuth();
-    const { login: contextLogin } = useAuthContext();
+    const { login: contextLogin, setActiveRole } = useAuthContext();
     const navigate = useNavigate();
 
+    const [showRoleSelection, setShowRoleSelection] = useState(false);
+    const [userRoles, setUserRoles] = useState<string[]>([]);
+
+    /** Maneja la redirección basada en el rol seleccionado */
+    const handleRoleRedirect = (role: string) => {
+        const normalizedRole = role.toLowerCase();
+        
+        // Set the active role in context
+        if (setActiveRole) {
+            setActiveRole(role);
+        }
+
+        if (normalizedRole.includes('administrador general')) {
+            navigate('/admin/dashboard');
+        } else if (normalizedRole.includes('administrador restaurante')) {
+            navigate('/restaurant/dashboard');
+        } else {
+            navigate('/');
+        }
+
+        if (onSuccess) {
+            onSuccess();
+        }
+    };
+
+    /** Maneja el envío del formulario de login */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const result = await login(email, password);
@@ -29,10 +57,25 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
             };
             contextLogin(userForContext, result.token);
 
+            // Check for multiple roles
+            if (result.user.roles && result.user.roles.length > 1) {
+                setUserRoles(result.user.roles);
+                setShowRoleSelection(true);
+                return; 
+            }
+
+            // Single role logic
+            if (result.user.roles && result.user.roles.length === 1) {
+                const singleRole = result.user.roles[0];
+                if (setActiveRole) {
+                    setActiveRole(singleRole);
+                }
+            }
+
             if (onSuccess) {
                 onSuccess();
             } else {
-                // Redirigir según el rol
+                // Redirigir según el rol (existing logic for single role)
                 const hasAdminRole = result.user.roles?.some((role: string) =>
                     role.toLowerCase().includes('administrador') || role.toLowerCase().includes('admin')
                 );
@@ -50,6 +93,15 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
             }
         }
     };
+
+    if (showRoleSelection) {
+        return (
+            <RoleSelection 
+                roles={userRoles} 
+                onSelect={handleRoleRedirect} 
+            />
+        );
+    }
 
     return (
         <div>

@@ -1,10 +1,6 @@
 import type { IOrderGateway } from '../../domain/gateways/IOrderGateway';
 import type { OrderDto, CreateOrderDto, OrderStatusDto } from '../dtos/order/OrderDto';
 
-/**
- * Servicio de aplicación para órdenes
- * Orquesta la comunicación con el gateway de órdenes
- */
 export class OrderService {
   private orderGateway: IOrderGateway;
 

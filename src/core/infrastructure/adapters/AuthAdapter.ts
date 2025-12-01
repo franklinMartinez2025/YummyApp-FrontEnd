@@ -6,17 +6,18 @@ import type { Response } from "../../../shared/types/api";
 import type { LoginResponseDto } from "../../application/dtos/auth/login-response.dto";
 
 export class AuthAdapter implements IAuthGateway {
+
+  /** Realiza la petición de login al backend */
   async login(credentials: LoginDto): Promise<Response<LoginResponseDto>> {
-    return await apiClient.post<Response<LoginResponseDto>>(
-      "/Auth/login",
-      credentials
-    );
+    return await apiClient.post<Response<LoginResponseDto>>("/Auth/login", credentials);
   }
 
+  /** Realiza la petición de registro al backend */
   async register(user: RegisterDto): Promise<Response<boolean>> {
     return await apiClient.post<Response<boolean>>("/Auth/register", user);
-  }
+  } 
 
+  /** Realiza la petición de logout al backend */
   async logout(): Promise<Response<boolean>> {
     return await apiClient.post<Response<boolean>>("/Auth/logout");
   }

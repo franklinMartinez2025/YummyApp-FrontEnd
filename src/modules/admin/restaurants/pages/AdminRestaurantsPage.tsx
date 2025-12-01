@@ -1,4 +1,4 @@
-import './AdminPages.css';
+import '../../styles/AdminPages.css';
 
 const AdminRestaurantsPage = () => {
   return (

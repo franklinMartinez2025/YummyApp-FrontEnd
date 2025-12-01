@@ -1,4 +1,5 @@
 import type { OrderDto, CreateOrderDto, OrderStatusDto } from '../../application/dtos/order/OrderDto';
+
 export interface IOrderGateway {
 
   getOrderById(id: string): Promise<OrderDto | null>;

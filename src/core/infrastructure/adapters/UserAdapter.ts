@@ -3,6 +3,7 @@ import type { UserDto, CreateUserDto, UpdateUserDto } from '../../application/dt
 import { apiClient } from '../api/apiClient';
 
 export class UserAdapter implements IUserGateway {
+  
   async getUserById(id: string): Promise<UserDto | null> {
     try {
       return await apiClient.get<UserDto>(`/users/${id}`);

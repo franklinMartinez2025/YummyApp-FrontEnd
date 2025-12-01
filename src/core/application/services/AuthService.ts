@@ -1,9 +1,10 @@
 import { LoginUseCase } from "../use-cases/auth/LoginUseCase";
 import type { IAuthGateway } from "../../domain/gateways/IAuthGateway";
-import type { Response } from "../common/api-reponses/response";
+import type { Response } from "../../../shared/types/api";
 import type { LoginResponseDto } from "../../application/dtos/auth/login-response.dto";
 
 export class AuthService {
+
   private loginUseCase: LoginUseCase;
   private authGateway: IAuthGateway;
 
@@ -12,6 +13,7 @@ export class AuthService {
     this.authGateway = authGateway;
   }
 
+  /** Inicia sesión validando credenciales y llamando al gateway */
   async login(
     email: string,
     password: string
@@ -21,6 +23,7 @@ export class AuthService {
     return response;
   }
 
+  /** Registra un nuevo usuario en el sistema */
   async register(
     email: string,
     password: string,
@@ -37,6 +40,7 @@ export class AuthService {
     });
   }
 
+  /** Cierra la sesión del usuario actual */
   async logout(): Promise<void> {
     await this.authGateway.logout();
   }

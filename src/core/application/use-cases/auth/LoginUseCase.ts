@@ -1,6 +1,8 @@
 import type { LoginDto } from "../../../application/dtos/auth/login.dto";
 
+/** Caso de uso para validar datos de login antes de enviarlos */
 export class LoginUseCase {
+  /** Ejecuta la validación de los datos de login */
   async execute(loginData: LoginDto): Promise<LoginDto> {
 
     if (!loginData.email || !loginData.password) {

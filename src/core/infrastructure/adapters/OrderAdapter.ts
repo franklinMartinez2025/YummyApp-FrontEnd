@@ -3,6 +3,7 @@ import type { OrderDto, CreateOrderDto, OrderStatusDto } from '../../application
 import { apiClient } from '../api/apiClient';
 
 export class OrderAdapter implements IOrderGateway {
+  
   async getOrderById(id: string): Promise<OrderDto | null> {
     try {
       return await apiClient.get<OrderDto>(`/orders/${id}`);

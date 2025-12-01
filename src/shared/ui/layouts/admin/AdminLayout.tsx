@@ -3,6 +3,7 @@ import { AdminSidebar } from './components/AdminSidebar';
 import { AdminHeader } from './components/AdminHeader';
 import './AdminLayout.css';
 
+/** Layout principal para el panel de administración */
 const AdminLayout = () => {
   return (
     <div className="admin-layout">

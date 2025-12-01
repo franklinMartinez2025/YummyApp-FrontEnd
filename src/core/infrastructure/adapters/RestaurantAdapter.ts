@@ -3,6 +3,7 @@ import type { RestaurantDto } from '../../application/dtos/restaurant/Restaurant
 import { apiClient } from '../api/apiClient';
 
 export class RestaurantAdapter implements IRestaurantGateway {
+  
   async getAllRestaurants(): Promise<RestaurantDto[]> {
     try {
       return await apiClient.get<RestaurantDto[]>('/restaurants');

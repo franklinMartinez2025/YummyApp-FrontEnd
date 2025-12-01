@@ -3,6 +3,7 @@ import type { ProductDto } from '../../application/dtos/order/ProductDto';
 import { apiClient } from '../api/apiClient';
 
 export class ProductAdapter implements IProductGateway {
+  
   async getProductsByRestaurant(restaurantId: string): Promise<ProductDto[]> {
     try {
       return await apiClient.get<ProductDto[]>(`/restaurants/${restaurantId}/products`);

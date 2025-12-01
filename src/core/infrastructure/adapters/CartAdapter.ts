@@ -3,6 +3,7 @@ import type { CartDto, AddCartItemDto, UpdateCartItemDto } from '../../applicati
 import { apiClient } from '../api/apiClient';
 
 export class CartAdapter implements ICartGateway {
+  
   async getCart(): Promise<CartDto | null> {
     try {
       return await apiClient.get<CartDto>('/cart');

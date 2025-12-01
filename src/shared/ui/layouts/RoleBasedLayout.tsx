@@ -6,6 +6,7 @@ import ClientLayout from './client/ClientLayout';
 /**
  * Layout basado en roles que determina qué layout mostrar según el rol del usuario
  */
+/** Layout dinámico que renderiza el layout correspondiente según el rol del usuario */
 export const RoleBasedLayout = () => {
   const { user, isAuthenticated } = useAuthContext();
 

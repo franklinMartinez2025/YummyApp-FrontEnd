@@ -1,5 +1,6 @@
 import { LoginForm } from '../components/LoginForm';
 
+/** Página principal de inicio de sesión */
 const LoginPage = () => {
   return (
     <div>

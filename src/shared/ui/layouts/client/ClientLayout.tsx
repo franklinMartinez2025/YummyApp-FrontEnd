@@ -5,6 +5,7 @@ import { CartFloatingButton } from '../../../../modules/client/cart/components/C
 import { CartDrawer } from '../../../../modules/client/cart/components/CartDrawer/CartDrawer';
 import '../public/PublicLayout.css';
 
+/** Layout principal para la vista de cliente (pública) */
 export const ClientLayout = () => {
   return (
     <div className="layout-wrapper">

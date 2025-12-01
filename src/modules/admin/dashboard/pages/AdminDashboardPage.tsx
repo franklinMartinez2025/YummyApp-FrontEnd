@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useAuthContext } from '../../../shared/context/useAuthContext';
-import './AdminPages.css';
+import { useAuthContext } from '../../../../shared/context/useAuthContext';
+import '../../styles/AdminPages.css';
 
 const AdminDashboardPage = () => {
   const { user } = useAuthContext();

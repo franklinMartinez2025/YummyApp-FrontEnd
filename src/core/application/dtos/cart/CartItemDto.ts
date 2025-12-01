@@ -1,4 +1,4 @@
-import type { ProductDto } from "../../restaurant/ProductDto";
+import type { ProductDto } from "../restaurant/ProductDto";
 
 export interface CartItemDto {
   product: ProductDto;

@@ -1,3 +1,5 @@
+import '../../styles/AdminPages.css';
+
 const AdminOrdersPage = () => {
   return (
     <div className="container-fluid">
@@ -19,4 +21,3 @@ const AdminOrdersPage = () => {
 };
 
 export default AdminOrdersPage;
-
