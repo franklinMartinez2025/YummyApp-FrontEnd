@@ -40,6 +40,25 @@ export class AuthService {
     });
   }
 
+  /** Envía un correo de recuperación de contraseña */
+  async forgotPassword(email: string): Promise<Response<boolean>> {
+    return await this.authGateway.forgotPassword(email);
+  }
+
+  /** Restablece la contraseña usando un token y la nueva contraseña */
+  async resetPassword(
+    email: string,
+    token: string,
+    newPassword: string
+  ): Promise<Response<boolean>> {
+    return await this.authGateway.resetPassword(email, token, newPassword);
+  }
+
+  /** Valida si el token de recuperación es válido */
+  async validateToken(token: string): Promise<Response<boolean>> {
+    return await this.authGateway.validateToken(token);
+  }
+
   /** Cierra la sesión del usuario actual */
   async logout(): Promise<void> {
     await this.authGateway.logout();

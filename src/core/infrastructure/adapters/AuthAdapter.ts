@@ -5,7 +5,7 @@ import { apiClient } from "../api/apiClient";
 import type { Response } from "../../../shared/types/api";
 import type { LoginResponseDto } from "../../application/dtos/auth/login-response.dto";
 
-export class AuthAdapter implements IAuthGateway {
+export class AuthAdapter implements IAuthGateway { 
 
   /** Realiza la petición de login al backend */
   async login(credentials: LoginDto): Promise<Response<LoginResponseDto>> {
@@ -17,7 +17,22 @@ export class AuthAdapter implements IAuthGateway {
     return await apiClient.post<Response<boolean>>("/Auth/register", user);
   } 
 
-  /** Realiza la petición de logout al backend */
+  /** Realiza la petición de forgot password al backend */
+  async forgotPassword(email: string): Promise<Response<boolean>> {
+    return await apiClient.post<Response<boolean>>("/Auth/forgot-password", { email });
+  }
+
+  /** Realiza la petición de reset password al backend */
+  async resetPassword(email: string, token: string, newPassword: string): Promise<Response<boolean>> {
+    return await apiClient.post<Response<boolean>>("/Auth/reset-password", { email, token, newPassword });
+  }
+
+  /** Realiza la petición de validate token al backend */
+  async validateToken(token: string): Promise<Response<boolean>> {
+    return await apiClient.post<Response<boolean>>("/Auth/validate-token", { token: token });
+  }
+
+    /** Realiza la petición de logout al backend */
   async logout(): Promise<Response<boolean>> {
     return await apiClient.post<Response<boolean>>("/Auth/logout");
   }

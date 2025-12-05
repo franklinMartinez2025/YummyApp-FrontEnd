@@ -24,6 +24,7 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
     const handleRoleRedirect = (role: string) => {
         const normalizedRole = role.toLowerCase();
 
+        //Si la funcion setActiveRole existe, se ejecuta agregando el rol seleccionado
         if (setActiveRole) setActiveRole(role);
 
         if (normalizedRole.includes('administrador general')) {

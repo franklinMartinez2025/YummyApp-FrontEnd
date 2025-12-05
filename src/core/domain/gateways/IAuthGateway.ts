@@ -4,11 +4,20 @@ import type { RegisterDto } from "../../application/dtos/auth/register.dto";
 import type { Response } from "../../../shared/types/api";
 
 export interface IAuthGateway {
+  /** Registra un nuevo usuario */
+  register(user: RegisterDto): Promise<Response<boolean>>;
+
   /** Iniciar sesión */
   login(credentials: LoginDto): Promise<Response<LoginResponseDto>>;
 
-  /** Registra un nuevo usuario */
-  register(user: RegisterDto): Promise<Response<boolean>>;
+  /** Recuperar contraseña */
+  forgotPassword(email: string): Promise<Response<boolean>>;
+
+  /** Restablecer contraseña */
+  resetPassword(email: string, token: string, newPassword: string): Promise<Response<boolean>>;
+
+  /** Validar token */
+  validateToken(token: string): Promise<Response<boolean>>;
 
   /** Cierra sesión */
   logout(): Promise<Response<boolean>>;

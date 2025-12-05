@@ -9,6 +9,8 @@ import { RestaurantsPage } from '../../modules/client/restaurants/pages/Restaura
 import { RestaurantDetailPage } from '../../modules/client/restaurants/pages/RestaurantDetailPage';
 import LoginPage from '../../modules/shared/auth/pages/LoginPage';
 import RegisterPage from '../../modules/shared/auth/pages/RegisterPage';
+import ForgotPasswordPage from '../../modules/shared/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from '../../modules/shared/auth/pages/ResetPasswordPage';
 import { CheckoutPage } from '../../modules/shared/orders/pages/CheckoutPage';
 // Páginas de administrador
 import AdminDashboardPage from '../../modules/admin/dashboard/pages/AdminDashboardPage';
@@ -46,6 +48,8 @@ export const AppRouter = () => (
         <Route index element={<LoginPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route element={<RoleBasedLayout />}>
