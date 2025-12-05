@@ -1,0 +1,201 @@
+/* Orders Kanban Board - Operational & Clear */
+.restaurant-orders-page {
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  --status-new-bg: #ffeaa7;
+  --status-new-text: #d35400;
+  --status-prep-bg: #74b9ff;
+  --status-prep-text: #0984e3;
+  --status-ready-bg: #55efc4;
+  --status-ready-text: #00b894;
+  --status-done-bg: #dfe6e9;
+  --status-done-text: #636e72;
+}
+
+/* Header */
+.orders-header {
+    background: white;
+    padding: 1.5rem;
+    border-bottom: 1px solid #dfe6e9;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    margin-bottom: 2rem;
+}
+
+/* Kanban Layout */
+.kanban-board {
+    display: flex;
+    overflow-x: auto;
+    gap: 1.5rem;
+    padding: 1rem;
+    min-height: calc(100vh - 200px);
+    align-items: flex-start; /* Columns shouldn't stretch */
+}
+
+.kanban-column {
+    background: #e3e6e8;
+    min-width: 320px;
+    width: 350px;
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Scroll inside column if needed */
+}
+
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0 5px;
+}
+
+.column-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #2d3436;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.column-count {
+    background: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #636e72;
+}
+
+.kanban-column-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-right: 5px; /* Space for scrollbar */
+}
+
+/* Custom Scrollbar for columns */
+.kanban-column-body::-webkit-scrollbar {
+    width: 6px;
+}
+.kanban-column-body::-webkit-scrollbar-thumb {
+    background-color: #bdc3c7;
+    border-radius: 4px;
+}
+
+/* Order Card */
+.order-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 5px solid transparent;
+    cursor: default;
+}
+
+.order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Status Colors for Borders and Badges */
+.order-card.status-new { border-left-color: var(--status-new-text); }
+.order-card.status-prep { border-left-color: var(--status-prep-text); }
+.order-card.status-ready { border-left-color: var(--status-ready-text); }
+.order-card.status-done { border-left-color: var(--status-done-text); opacity: 0.8; }
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+}
+
+.order-id {
+    font-weight: 800;
+    color: #2d3436;
+}
+
+.order-time {
+    color: #b2bec3;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.order-items {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+}
+
+.order-item {
+    font-size: 0.9rem;
+    color: #636e72;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.item-qty {
+    font-weight: 700;
+    margin-right: 8px;
+    color: #2d3436;
+}
+
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #dfe6e9;
+    padding-top: 0.8rem;
+}
+
+.order-total {
+    font-weight: 800;
+    color: #2d3436;
+}
+
+.btn-action {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+/* Action Button Colors */
+.btn-accept {
+    background: #dff9fb;
+    color: #0984e3;
+}
+.btn-accept:hover { background: #0984e3; color: white; }
+
+.btn-ready {
+    background: #e3fcef;
+    color: #00b894;
+}
+.btn-ready:hover { background: #00b894; color: white; }
+
+.btn-deliver {
+    background: #fff0f0;
+    color: #ff6b6b;
+}
+.btn-deliver:hover { background: #ff6b6b; color: white; }
+
+/* Empty State */
+.empty-col {
+    text-align: center;
+    color: #b2bec3;
+    margin-top: 2rem;
+    font-style: italic;
+}
