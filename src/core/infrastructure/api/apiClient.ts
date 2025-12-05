@@ -27,6 +27,11 @@ export class ApiClient {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        // Disparar evento para que el AuthProvider cierre la sesión
+        window.dispatchEvent(new Event('auth:unauthorized'));
+        throw new Error('Sesión expirada o inválida');
+      }
       throw new Error(`API Error: ${response.statusText}`);
     }
 
