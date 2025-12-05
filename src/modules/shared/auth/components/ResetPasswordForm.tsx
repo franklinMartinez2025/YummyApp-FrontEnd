@@ -1,58 +1,66 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const ResetPasswordForm = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const token = searchParams.get('token');
-    const email = searchParams.get('email');
+    const location = useLocation();
+    
+    // Obtener valores de la URL (flujo normal por correo)
+    const urlToken = searchParams.get('token');
+    const urlEmail = searchParams.get('email');
+    
+    // Obtener email del estado de la navegación (flujo manual desde ForgotPassword)
+    const stateEmail = location.state?.email || '';
 
+    const [manualToken, setManualToken] = useState('');
+    const [manualEmail, setManualEmail] = useState(stateEmail);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { resetPassword, validateToken, isLoading, error } = useAuth();
-    const [isValidatingToken, setIsValidatingToken] = useState(true);
+    const [isValidatingToken, setIsValidatingToken] = useState(false); // Iniciamos en false por defecto
     const [tokenError, setTokenError] = useState<string | null>(null);
+
+    // Determinar si debemos mostrar los campos manuales
+    const showManualInputs = !urlToken || !urlEmail;
 
     useEffect(() => {
         const checkToken = async () => {
-            if (!token) {
-                setTokenError('Token no proporcionado.');
+            if (urlToken) {
+                setIsValidatingToken(true);
+                // Validar token automáticamente si viene en la URL
+                const result = await validateToken(urlToken);
+                if (!result || !result.success) {
+                    setTokenError(result?.error || 'El enlace de recuperación es inválido o ha expirado.');
+                }
                 setIsValidatingToken(false);
-                return;
             }
-
-            // Opcional: Validar token al cargar la página
-            const result = await validateToken(token);
-            if (!result || !result.success) {
-                setTokenError(result?.error || 'El enlace de recuperación es inválido o ha expirado.');
-            }
-            setIsValidatingToken(false);
         };
 
         checkToken();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token]);
+    }, [urlToken]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         if (newPassword !== confirmPassword) {
-            // Manejamos el error localmente o podríamos usar un estado de error local, 
-            // pero useAuth.error es global para el hook. Usaremos alert o un estado simple por ahora
-            // O mejor, reutilizamos el error del hook si pudiéramos setearlo, pero como no:
-            // Vamos a confiar en la validación de HTML5 o agregar un estado local simple de error de validación
             alert("Las contraseñas no coinciden");
             return;
         }
 
-        if (!token || !email) {
-            setTokenError("Datos de recuperación incompletos (token o email faltante).");
+        const finalToken = urlToken || manualToken;
+        const finalEmail = urlEmail || manualEmail;
+
+        if (!finalToken || !finalEmail) {
+            setTokenError("Es necesario proporcionar el token y el correo electrónico.");
             return;
         }
 
-        const result = await resetPassword(email, token, newPassword);
+        const result = await resetPassword(finalEmail, finalToken, newPassword);
 
         if (result && result.success) {
             setSuccessMessage(result.message || 'Contraseña restablecida correctamente.');
@@ -79,9 +87,12 @@ export const ResetPasswordForm = () => {
                 <div className="alert alert-danger border-0 bg-danger bg-opacity-25 text-white mb-4" role="alert">
                     <i className="bi bi-x-circle me-2"></i> {tokenError}
                 </div>
-                <Link to="/auth/forgot-password" className="btn btn-auth">
-                    Solicitar nuevo enlace
-                </Link>
+                <button 
+                    onClick={() => { setTokenError(null); navigate('/auth/reset-password'); }} 
+                    className="btn btn-auth mb-3"
+                >
+                    Intentar nuevamente
+                </button>
                 <div className="mt-3">
                     <Link to="/auth/login" className="text-white-50 text-decoration-none small hover-white">
                         Volver al inicio de sesión
@@ -113,7 +124,43 @@ export const ResetPasswordForm = () => {
                 </div>
             )}
 
+            {/* Mensaje informativo si estamos en modo manual */}
+            {showManualInputs && (
+                <div className="alert alert-info border-0 bg-info bg-opacity-25 text-white mb-4" role="alert">
+                    <i className="bi bi-info-circle me-2"></i> Ingresa el código que recibiste y tu correo.
+                </div>
+            )}
+
             <form onSubmit={handleSubmit}>
+                {showManualInputs && (
+                    <>
+                         <div className="form-floating mb-3">
+                            <input
+                                type="email"
+                                className="form-control"
+                                id="floatingEmail"
+                                placeholder="nombre@ejemplo.com"
+                                value={manualEmail}
+                                onChange={(e) => setManualEmail(e.target.value)}
+                                required
+                            />
+                            <label htmlFor="floatingEmail">Correo Electrónico</label>
+                        </div>
+                        <div className="form-floating mb-3">
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="floatingToken"
+                                placeholder="Código de recuperación"
+                                value={manualToken}
+                                onChange={(e) => setManualToken(e.target.value)}
+                                required
+                            />
+                            <label htmlFor="floatingToken">Código / Token</label>
+                        </div>
+                    </>
+                )}
+
                 <div className="form-floating mb-3">
                     <input
                         type="password"

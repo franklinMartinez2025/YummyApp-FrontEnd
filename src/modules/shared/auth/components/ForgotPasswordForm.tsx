@@ -1,21 +1,29 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const ForgotPasswordForm = () => {
     const [email, setEmail] = useState('');
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { forgotPassword, isLoading, error } = useAuth();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSuccessMessage(null);
         
-        const result = await forgotPassword(email);
+        // Mantener el email actual antes de enviarlo
+        const currentEmail = email;
+        const result = await forgotPassword(currentEmail);
         
         if (result && result.success) {
             setSuccessMessage(result.message || 'Se ha enviado un enlace de recuperación a tu correo.');
-            setEmail('');
+            
+            // Esperar 2 segundos para que el usuario lea el mensaje
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Navegar usando el email capturado
+            navigate('/auth/reset-password', { state: { email: currentEmail } });
         }
     };
 
@@ -28,8 +36,13 @@ export const ForgotPasswordForm = () => {
             )}
 
             {successMessage && (
-                <div className="alert alert-success border-0 bg-success bg-opacity-25 text-white mb-4" role="alert">
-                    <i className="bi bi-check-circle me-2"></i> {successMessage}
+                <div className="mb-4 text-center">
+                    <div className="alert alert-success border-0 bg-success bg-opacity-25 text-white mb-3" role="alert">
+                        <i className="bi bi-check-circle me-2"></i> {successMessage}
+                    </div>
+                    <Link to="/auth/reset-password" className="btn btn-outline-light btn-sm">
+                        <i className="bi bi-keyboard me-2"></i>Ingresar código manual
+                    </Link>
                 </div>
             )}
 
