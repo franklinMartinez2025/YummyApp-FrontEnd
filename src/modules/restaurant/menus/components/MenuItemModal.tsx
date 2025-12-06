@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import '../styles/MenuItemModal.css';
-import { ProductSelectorModal } from './ProductSelectorModal';
 import { AlertDialog, type AlertType } from '../../../shared/components/AlertDialog';
+import type { ModifierGroup, ModifierItem } from './ExtrasLibrary';
 
 // Types
 export interface ExtraOption {
@@ -17,6 +17,7 @@ export interface ExtraGroup {
   minSelection: number;
   maxSelection: number;
   options: ExtraOption[];
+  sourceGroupId?: string; // Link to library
 }
 
 export interface MenuItem {
@@ -45,20 +46,23 @@ interface MenuItemModalProps {
   initialItem?: MenuItem;
   availableCategories?: string[];
   existingItems?: MenuItem[]; // RF-REST-014 (Validation) & RF-REST-020 (Combos)
+  availableGroups?: ModifierGroup[]; // Library
+  availableModifierItems?: ModifierItem[]; // Reference for names if needed
 }
 
 const DEFAULT_CATEGORIES = ["Entradas", "Platos Fuertes", "Bebidas", "Postres"];
-const DAYS_OF_WEEK = [
-    { key: 'Mon', label: 'L' }, { key: 'Tue', label: 'M' }, { key: 'Wed', label: 'X' },
-    { key: 'Thu', label: 'J' }, { key: 'Fri', label: 'V' }, { key: 'Sat', label: 'S' }, { key: 'Sun', label: 'D' }
-];
 
-export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableCategories = DEFAULT_CATEGORIES, existingItems = [] }: MenuItemModalProps) => {
+
+export const MenuItemModal = ({ 
+    isOpen, onClose, onSave, initialItem, 
+    availableCategories = DEFAULT_CATEGORIES, existingItems = [],
+    availableGroups = [], availableModifierItems = []
+}: MenuItemModalProps) => {
     const [formData, setFormData] = useState<MenuItem>({
         name: '', description: '', price: 0, image: '', category: availableCategories[0] || '', status: 'Activo', 
-        extras: [{ id: 'default', name: 'Contenido del Combo', minSelection: 0, maxSelection: 99, options: [] }],
+        extras: [], // Default empty
         preparationTime: 15, isStockManaged: false, stock: 0, isRecommended: false, isPopular: false, 
-        availableDays: DAYS_OF_WEEK.map(d => d.key),
+        availableDays: [],
         isVisible: true
     });
 
@@ -67,7 +71,6 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
     const [activeTab, setActiveTab] = useState<'info' | 'extras'>('info');
     const [isVisible, setIsVisible] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
 
     // Alert State
     const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, type: AlertType}>({
@@ -86,46 +89,15 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
         }
     }, [isOpen, availableCategories]);
 
-// ... (existing UseEffect and handleChange)
-
-    // Extras Logic (Same logic, nicely wrapped)
-// ... (existing logic)
-
-    const handleAddProducts = (selectedProducts: MenuItem[]) => {
-        const newExtras = [...(formData.extras || [])];
-        if (newExtras.length === 0) {
-             newExtras.push({ id: 'default', name: 'Contenido del Combo', minSelection: 0, maxSelection: 99, options: [] });
-        }
-        const currentGroup = newExtras[0];
-
-        selectedProducts.forEach(prod => {
-            // Avoid duplicates in the same group
-            if (!currentGroup.options.some(opt => opt.linkedProductId === prod.id)) {
-                currentGroup.options.push({
-                    id: Date.now().toString() + Math.random().toString(), // Unique ID
-                    name: prod.name,
-                    price: 0, // RF-REST REQUEST: Final price is unified, so extra price is 0
-                    linkedProductId: prod.id
-                });
-            }
-        });
-
-        setFormData(prev => ({ ...prev, extras: newExtras }));
-    };
-
-    const openProductSelector = () => {
-        setIsProductSelectorOpen(true);
-    };
-
     useEffect(() => {
         if (initialItem) {
             setFormData(initialItem);
         } else {
             setFormData({
                 name: '', description: '', price: 0, image: '', category: categories[0] || '', status: 'Activo', 
-                extras: [{ id: 'default', name: 'Contenido del Combo', minSelection: 0, maxSelection: 99, options: [] }],
+                extras: [],
                 preparationTime: 15, isStockManaged: false, stock: 0, isRecommended: false, isPopular: false, 
-                availableDays: DAYS_OF_WEEK.map(d => d.key),
+                availableDays: [],
                 isVisible: true
             });
         }
@@ -149,33 +121,7 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
         if (name === 'name') setError(null);
     };
 
-    const toggleDay = (dayKey: string) => {
-        setFormData(prev => {
-            const current = prev.availableDays || [];
-            return {
-                ...prev,
-                availableDays: current.includes(dayKey) 
-                    ? current.filter(d => d !== dayKey) 
-                    : [...current, dayKey]
-            };
-        });
-    };
 
-    // Extras Logic (Same logic, nicely wrapped)
-
-
-    const addOptionToGroup = () => {
-        const newExtras = [...(formData.extras || [])];
-        if (newExtras.length === 0) {
-             newExtras.push({ id: 'default', name: 'Contenido del Combo', minSelection: 0, maxSelection: 99, options: [] });
-        }
-        newExtras[0].options.push({
-            id: Date.now().toString(),
-            name: 'Opción Nueva',
-            price: 0
-        });
-        setFormData(prev => ({ ...prev, extras: newExtras }));
-    };
 
     const updateOption = (groupIndex: number, optionIndex: number, field: keyof ExtraOption, value: any) => {
         const newExtras = [...(formData.extras || [])];
@@ -184,6 +130,28 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
             [field]: field === 'price' ? parseFloat(value) : value
         };
         setFormData(prev => ({ ...prev, extras: newExtras }));
+    };
+
+    const linkGroup = (libraryGroup: ModifierGroup) => {
+        // Convert Library Group to Product Extra Group
+        const newGroup: ExtraGroup = {
+            id: Date.now().toString(),
+            name: libraryGroup.name,
+            minSelection: libraryGroup.minSelection,
+            maxSelection: libraryGroup.maxSelection,
+            sourceGroupId: libraryGroup.id,
+            options: libraryGroup.options.map(opt => {
+                // Resolve name from ID if possible
+                const itemDef = availableModifierItems.find(i => i.id === opt.itemId);
+                return {
+                    id: Date.now().toString() + Math.random(),
+                    name: itemDef ? itemDef.name : 'Unknown Item',
+                    price: opt.price
+                };
+            })
+        };
+
+        setFormData(prev => ({ ...prev, extras: [...(prev.extras || []), newGroup] }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -257,26 +225,31 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
                         {activeTab === 'info' ? (
                             <div className="row g-3">
                                 { /* Name & Category */ }
-                                <div className="col-md-6">
-                                    <div className="input-group-custom">
-                                        <label className="form-label-custom">Nombre</label>
-                                        <input type="text" className="form-control-custom" name="name" value={formData.name} onChange={handleChange} required placeholder="Ej. Lomo Saltado" />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="input-group-custom">
-                                        <label className="form-label-custom">Categoría</label>
-                                        <div className="d-flex gap-2">
-                                            {isAddingCategory ? (
-                                                <input type="text" className="form-control-custom animate-fade-in" name="category" value={formData.category} onChange={handleChange} placeholder="Nueva..." autoFocus />
-                                            ) : (
-                                                <select className="form-control-custom" name="category" value={formData.category} onChange={handleChange}>
-                                                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                                </select>
-                                            )}
-                                            <button type="button" className={`btn ${isAddingCategory ? 'btn-danger' : 'btn-outline-primary'} rounded-3 px-3`} onClick={() => setIsAddingCategory(!isAddingCategory)}>
-                                                <i className={`bi ${isAddingCategory ? 'bi-x-lg' : 'bi-plus-lg'}`}></i>
-                                            </button>
+                                { /* Name & Category */ }
+                                <div className="col-12">
+                                    <div className="row g-3">
+                                        <div className="col-md-7">
+                                            <div className="input-group-custom">
+                                                <label className="form-label-custom">Nombre</label>
+                                                <input type="text" className="form-control-custom" name="name" value={formData.name} onChange={handleChange} required placeholder="Ej. Lomo Saltado" />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-5">
+                                            <div className="input-group-custom">
+                                                <label className="form-label-custom">Categoría</label>
+                                                <div className="d-flex gap-2">
+                                                    {isAddingCategory ? (
+                                                        <input type="text" className="form-control-custom animate-fade-in" name="category" value={formData.category} onChange={handleChange} placeholder="Nueva..." autoFocus />
+                                                    ) : (
+                                                        <select className="form-control-custom" name="category" value={formData.category} onChange={handleChange} style={{flex: 1}}>
+                                                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                                        </select>
+                                                    )}
+                                                    <button type="button" className={`btn ${isAddingCategory ? 'btn-danger' : 'btn-outline-primary'} rounded-3 px-3`} onClick={() => setIsAddingCategory(!isAddingCategory)}>
+                                                        <i className={`bi ${isAddingCategory ? 'bi-x-lg' : 'bi-plus-lg'}`}></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -312,51 +285,17 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
                                     </div>
                                 </div>
 
-                                { /* Availability (RF-REST-022) */ }
-                                <div className="col-12">
-                                    <label className="form-label-custom mb-1">Disponibilidad Semanal</label>
-                                    <div className="d-flex gap-2">
-                                        {DAYS_OF_WEEK.map(day => (
-                                            <button 
-                                                key={day.key} 
-                                                type="button"
-                                                className={`btn btn-sm rounded-circle ${formData.availableDays?.includes(day.key) ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                                style={{width: '32px', height: '32px', padding: 0}}
-                                                onClick={() => toggleDay(day.key)}
-                                            >
-                                                {day.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                { /* Stock & Tags (RF-REST-013, 015) */ }
-                                <div className="col-12 d-flex flex-wrap gap-4 align-items-center bg-light p-3 rounded-3 border">
+                                { /* Stock Management Only */ }
+                                <div className="col-12 d-flex align-items-center bg-light p-3 rounded-3 border">
                                     <div className="form-check form-switch">
                                         <input className="form-check-input" type="checkbox" id="stockSwitch" name="isStockManaged" checked={formData.isStockManaged} onChange={handleChange} />
                                         <label className="form-check-label fw-bold small" htmlFor="stockSwitch">Gestionar Stock</label>
                                     </div>
                                     {formData.isStockManaged && (
-                                        <div className="animate-fade-in" style={{width: '120px'}}>
+                                        <div className="animate-fade-in ms-3" style={{width: '120px'}}>
                                             <input type="number" className="form-control form-control-sm border-secondary" name="stock" value={formData.stock} onChange={handleChange} placeholder="Cant." />
                                         </div>
                                     )}
-                                    <div className="vr mx-2"></div>
-                                    <div className="form-check form-switch">
-                                        <input className="form-check-input" type="checkbox" id="recSwitch" name="isRecommended" checked={formData.isRecommended} onChange={handleChange} />
-                                        <label className="form-check-label badge bg-warning text-dark cursor-pointer" htmlFor="recSwitch">⭐ Recomendado</label>
-                                    </div>
-                                    <div className="form-check form-switch">
-                                        <input className="form-check-input" type="checkbox" id="popSwitch" name="isPopular" checked={formData.isPopular} onChange={handleChange} />
-                                        <label className="form-check-label badge bg-danger cursor-pointer" htmlFor="popSwitch">🔥 Popular</label>
-                                    </div>
-                                    <div className="vr mx-2"></div>
-                                    <div className="form-check form-switch" title="Si se desactiva, el producto no aparecerá en el menú público (ideal para items base de combos)">
-                                        <input className="form-check-input" type="checkbox" id="visibleSwitch" name="isVisible" checked={formData.isVisible !== false} onChange={handleChange} />
-                                        <label className="form-check-label fw-bold text-success cursor-pointer" htmlFor="visibleSwitch">
-                                            {formData.isVisible !== false ? <><i className="bi bi-eye-fill me-1"></i>Visible al Público</> : <><i className="bi bi-eye-slash-fill me-1 text-muted"></i>Oculto al Público</>}
-                                        </label>
-                                    </div>
                                 </div>
 
                                 { /* Image */ }
@@ -370,67 +309,98 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
                                             <img src={formData.image} alt="Preview" style={{height: '100%', objectFit: 'cover'}} />
                                         </div>
                                     )}
-                                </div>
+                                </div> 
                             </div>
                         ) : (
                             <div className="extras-management animate-fade-in-up">
-                                <div className="extra-card">
-                                    <div className="table-responsive">
-                                        <table className="table table-borderless align-middle mb-0">
-                                            <thead className="text-muted small text-uppercase"><tr><th>Item</th><th style={{width: '120px'}} className="text-end">Extra ($)</th><th style={{width: '50px'}}></th></tr></thead>
-                                            <tbody>
-                                                {formData.extras?.[0]?.options.map((opt, oIndex) => (
-                                                    <tr key={opt.id} className={opt.linkedProductId ? "bg-light" : ""}>
-                                                        <td>
-                                                            {opt.linkedProductId ? (
-                                                                <div className="d-flex align-items-center gap-2 py-1">
-                                                                    <span className="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" title="Producto Vinculado">
-                                                                        <i className="bi bi-box-seam-fill me-1"></i>Combo Item
-                                                                    </span>
-                                                                    <span className="fw-bold text-dark">{opt.name}</span>
-                                                                </div>
-                                                            ) : (
-                                                                <input type="text" className="form-control form-control-sm border-0 bg-transparent border-bottom rounded-0" value={opt.name} onChange={(e) => updateOption(0, oIndex, 'name', e.target.value)} placeholder="Nombre Opción" />
-                                                            )}
-                                                        </td>
-                                                        <td className="text-end">
-                                                            {opt.linkedProductId ? (
-                                                                <span className="text-muted small">Incluido</span>
-                                                            ) : (
-                                                                <input type="number" className="form-control form-control-sm border-0 bg-transparent border-bottom rounded-0 text-end" value={opt.price} onChange={(e) => updateOption(0, oIndex, 'price', e.target.value)} />
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            <button type="button" className="btn btn-link text-danger p-0" title="Eliminar" onClick={() => {
-                                                                const newExtras = [...(formData.extras || [])];
-                                                                if (newExtras[0]) {
-                                                                    newExtras[0].options.splice(oIndex, 1);
-                                                                    setFormData(prev => ({ ...prev, extras: newExtras }));
-                                                                }
-                                                            }}><i className="bi bi-trash"></i></button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                                {(!formData.extras?.[0]?.options.length) && (
-                                                    <tr><td colSpan={3} className="text-center text-muted py-4 small">Añade items al combo usando los botones de abajo.</td></tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    
-                                    <div className="d-flex gap-2 mt-2">
-                                        <button type="button" className="btn btn-sm btn-light text-secondary flex-grow-1 rounded-3 fw-bold py-2" onClick={addOptionToGroup}>
-                                            <i className="bi bi-plus me-1"></i>Opción Simple
+                                {/* Header Actions */}
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 className="mb-0 fw-bold text-dark">Grupos Asignados</h6>
+                                    <div className="dropdown">
+                                        <button className="btn btn-sm btn-primary dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
+                                            <i className="bi bi-link-45deg me-1"></i>Vincular Grupo
                                         </button>
-                                        
-                                        <button 
-                                            type="button" 
-                                            className="btn btn-sm btn-primary-soft text-primary flex-grow-1 rounded-3 fw-bold py-2 border border-primary-subtle" 
-                                            onClick={openProductSelector}
-                                        >
-                                            <i className="bi bi-search me-1"></i>Seleccionar Platillos (+)
-                                        </button>
+                                        <ul className="dropdown-menu shadow border-0 p-1" style={{maxHeight:'250px', overflowY:'auto'}}>
+                                            <li><h6 className="dropdown-header text-uppercase fs-xs">Biblioteca de Grupos</h6></li>
+                                            {availableGroups.length === 0 && <li className="px-3 py-2 text-muted small">No hay grupos creados. Ve a la pestaña de Bibliotecas.</li>}
+                                            {availableGroups.map(grp => (
+                                                <li key={grp.id}>
+                                                    <button type="button" className="dropdown-item rounded-2 py-2" onClick={() => linkGroup(grp)}>
+                                                        {grp.name} <span className="text-muted small ms-2">({grp.options.length} items)</span>
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
+                                </div>
+
+                                {(!formData.extras || formData.extras.length === 0) && (
+                                    <div className="text-center p-5 border rounded-3 bg-light text-muted">
+                                        <i className="bi bi-diagram-2 fs-1 mb-2 d-block opacity-50"></i>
+                                        <p className="mb-0">Este producto no tiene grupos de modificadores.</p>
+                                        <small>Vincula grupos como "Entradas" o "Bebidas" desde tu biblioteca.</small>
+                                    </div>
+                                )}
+
+                                <div className="d-flex flex-column gap-3">
+                                    {formData.extras?.map((group, groupIndex) => (
+                                        <div key={group.id} className="card border shadow-sm group-card">
+                                            <div className="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                                <div className="d-flex align-items-center gap-2 flex-grow-1">
+                                                    {group.sourceGroupId && (
+                                                        <span className="badge bg-primary-subtle text-primary border border-primary-subtle" title="Vinculado a Biblioteca">
+                                                            <i className="bi bi-link-45deg"></i>
+                                                        </span>
+                                                    )}
+                                                    <input 
+                                                        type="text" 
+                                                        className="form-control form-control-sm border-0 fw-bold px-0 shadow-none text-dark" 
+                                                        value={group.name} 
+                                                        readOnly 
+                                                        style={{cursor: 'default'}}
+                                                    />
+                                                </div>
+                                                <button type="button" className="btn btn-sm text-danger" onClick={() => {
+                                                    const newExtras = [...(formData.extras || [])];
+                                                    newExtras.splice(groupIndex, 1);
+                                                    setFormData(prev => ({ ...prev, extras: newExtras }));
+                                                }}>
+                                                    <i className="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                            <div className="card-body p-3 bg-light">
+                                                {/* Rules Info */}
+                                                <div className="d-flex align-items-center fs-sm text-muted mb-2">
+                                                    <i className="bi bi-info-circle me-2"></i>
+                                                    Reglas: {group.minSelection === 1 && group.maxSelection === 1 
+                                                        ? 'Selección Única (Obligatorio)' 
+                                                        : `Cliente elige entre ${group.minSelection} y ${group.maxSelection}`}
+                                                </div>
+
+                                                {/* Options List Read-Onlyish */}
+                                                <div className="table-responsive bg-white rounded-3 border">
+                                                    <table className="table table-sm table-borderless align-middle mb-0">
+                                                        <thead className="text-muted small text-uppercase bg-light border-bottom">
+                                                            <tr>
+                                                                <th className="ps-3">Opción</th>
+                                                                <th className="text-end pe-3">Precio Extra</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {group.options.map((opt, oIndex) => (
+                                                                <tr key={opt.id} className="border-bottom-custom">
+                                                                    <td className="ps-3 text-dark">{opt.name}</td>
+                                                                    <td className="text-end pe-3">
+                                                                         {opt.price > 0 ? `+ $${opt.price.toFixed(2)}` : 'Gratis'}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -451,13 +421,6 @@ export const MenuItemModal = ({ isOpen, onClose, onSave, initialItem, availableC
                 </form>
             </div>
             
-            <ProductSelectorModal 
-                isOpen={isProductSelectorOpen}
-                onClose={() => setIsProductSelectorOpen(false)}
-                products={existingItems || []}
-                onSelect={handleAddProducts}
-            />
-
             <AlertDialog 
                 isOpen={alertConfig.isOpen}
                 title={alertConfig.title}
