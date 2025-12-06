@@ -1,68 +1,61 @@
-import '../../my-deliveries/styles/DeliveryPages.css';
+import { useNavigate } from 'react-router-dom';
+import '../styles/AvailableOrdersPage.css';
 
 const AvailableOrdersPage = () => {
-  const orders = [
-    {
-      id: 1,
-      restaurant: 'Pizza Hut',
-      address: 'Av. Principal 123',
-      distance: '2.5 km',
-      price: '$4.50',
-      items: 3
-    },
-    {
-      id: 2,
-      restaurant: 'Burger King',
-      address: 'Calle 45 #12-34',
-      distance: '1.2 km',
-      price: '$3.00',
-      items: 1
-    }
-  ];
+  const navigate = useNavigate();
 
   return (
-    <div className="delivery-page">
-      <header className="delivery-header">
-        <h1 className="delivery-header-title">Pedidos Disponibles</h1>
-        <div className="delivery-status-badge delivery-status-online">
-          {orders.length} zona
+    <div className="available-orders-page">
+        <div className="orders-header">
+            <h2 className="fw-bold mb-0 text-dark" style={{fontSize: '1.25rem'}}>Pedidos Cercanos</h2>
+            <button className="refresh-btn">
+                <i className="bi bi-arrow-clockwise"></i>
+            </button>
         </div>
-      </header>
 
-      <div className="orders-list">
-        {orders.map(order => (
-          <div key={order.id} className="order-card">
-            <div className="order-header">
-              <div className="restaurant-info">
-                <i className="bi bi-shop"></i>
-                <span>{order.restaurant}</span>
-              </div>
-              <span className="order-price">{order.price}</span>
-            </div>
-            
-            <div className="order-details">
-              <div className="detail-row">
-                <i className="bi bi-geo-alt"></i>
-                <span>{order.address}</span>
-              </div>
-              <div className="detail-row">
-                <i className="bi bi-bicycle"></i>
-                <span>{order.distance} de distancia</span>
-              </div>
-              <div className="detail-row">
-                <i className="bi bi-bag"></i>
-                <span>{order.items} artículos</span>
-              </div>
-            </div>
+        <div className="container-fluid px-3 pt-3">
+            {[1, 2].map(id => (
+                <div key={id} className="order-ticket animate-enter">
+                    <div className="ticket-header">
+                        <span className="ticket-price">S/ 12.50</span>
+                        <span className="ticket-distance">
+                            <i className="bi bi-geo-alt-fill"></i> 2.4 km
+                        </span>
+                    </div>
+                    <div className="ticket-body">
+                        <div className="route-step">
+                            <div className="step-icon">
+                                <div className="dot dot-pickup"></div>
+                                <div className="connector"></div>
+                            </div>
+                            <div className="step-info">
+                                <h5>Bembos - Larcomar</h5>
+                                <p>Av. Larco 1234, Miraflores</p>
+                            </div>
+                        </div>
+                        <div className="route-step">
+                            <div className="step-icon">
+                                <div className="dot dot-dropoff"></div>
+                            </div>
+                            <div className="step-info">
+                                <h5>Juan Pérez</h5>
+                                <p>Calle Los Pinos 456, Dpto 201</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="ticket-footer">
+                        <button className="btn-accept" onClick={() => navigate('/delivery/my-deliveries')}>
+                            Aceptar Pedido
+                        </button>
+                    </div>
+                </div>
+            ))}
 
-            <div className="order-actions">
-              <button className="btn-accept">
-                Aceptar Pedido
-              </button>
+            <div className="empty-state animate-enter delay-3">
+                <div className="radar-spinner"></div>
+                <p>Buscando más pedidos cerca de ti...</p>
             </div>
-          </div>
-        ))}
-      </div>
+        </div>
     </div>
   );
 };

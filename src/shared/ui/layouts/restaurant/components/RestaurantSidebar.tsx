@@ -23,21 +23,7 @@ export const RestaurantSidebar = () => {
       icon: 'bi-menu-button-wide',
       label: 'Mi Menú',
     },
-    {
-      path: '/restaurant/foods',
-      icon: 'bi-egg-fried',
-      label: 'Comidas',
-    },
-    {
-      path: '/restaurant/drinks',
-      icon: 'bi-cup-straw',
-      label: 'Bebidas',
-    },
-    {
-      path: '/restaurant/desserts',
-      icon: 'bi-cake',
-      label: 'Postres',
-    },
+
     {
       path: '/restaurant/orders',
       icon: 'bi-cart-check',

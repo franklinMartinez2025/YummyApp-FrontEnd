@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import '../../menus/styles/RestaurantMenuPage.css';
+import { MenuItemModal } from '../components/MenuItemModal';
+import { CategoryManagerModal } from '../components/CategoryManagerModal';
+import type { MenuItem } from '../components/MenuItemModal';
+import type { Category } from '../components/CategoryManagerModal';
 
 // Mock Data
-const MENU_ITEMS = [
+const INITIAL_MENU_ITEMS: MenuItem[] = [
   {
     id: 1,
     name: "Hamburguesa Yummy Supreme",
@@ -59,14 +63,53 @@ const MENU_ITEMS = [
   }
 ];
 
-const CATEGORIES = ["Todo", "Entradas", "Platos Fuertes", "Bebidas", "Postres"];
+const INITIAL_CATEGORIES: Category[] = [
+    { id: '1', name: 'Entradas', isActive: true, productCount: 1 },
+    { id: '2', name: 'Platos Fuertes', isActive: true, productCount: 3 },
+    { id: '3', name: 'Bebidas', isActive: true, productCount: 1 },
+    { id: '4', name: 'Postres', isActive: true, productCount: 1 },
+];
 
 const RestaurantMenuPage = () => {
+  const [items, setItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
+  const [managedCategories, setManagedCategories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [activeCategory, setActiveCategory] = useState("Todo");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false); // NEW STATE
+  const [itemToEdit, setItemToEdit] = useState<MenuItem | undefined>(undefined);
+
+  // Calculate product counts dynamically for validation
+  const categoriesWithCounts = useMemo(() => {
+      return managedCategories.map(cat => ({
+          ...cat,
+          productCount: items.filter(i => i.category === cat.name).length
+      }));
+  }, [items, managedCategories]);
 
   const filteredItems = activeCategory === "Todo" 
-    ? MENU_ITEMS 
-    : MENU_ITEMS.filter(item => item.category === activeCategory);
+    ? items 
+    : items.filter(item => item.category === activeCategory);
+
+  const handleCreate = () => {
+      setItemToEdit(undefined);
+      setIsModalOpen(true);
+  };
+
+  const handleEdit = (item: MenuItem) => {
+      setItemToEdit(item);
+      setIsModalOpen(true);
+  };
+
+  const handleSave = (item: MenuItem) => {
+      if (itemToEdit) {
+          // Update
+          setItems(prev => prev.map(i => i.id === itemToEdit.id ? { ...item, id: itemToEdit.id } : i));
+      } else {
+          // Create
+          setItems(prev => [...prev, { ...item, id: Date.now() }]);
+      }
+      setIsModalOpen(false);
+  };
 
   return (
     <div className="restaurant-menu-page p-4">
@@ -77,7 +120,7 @@ const RestaurantMenuPage = () => {
             <h1 className="fw-bold mb-2 text-dark">Gestionar Menú</h1>
             <p className="text-secondary mb-0">Administra tus platillos y categorías</p>
           </div>
-          <button className="btn-yummy-add">
+          <button className="btn-yummy-add" onClick={handleCreate}>
             <i className="bi bi-plus-lg"></i>
             Nuevo Platillo
           </button>
@@ -89,7 +132,7 @@ const RestaurantMenuPage = () => {
             <div className="stat-card p-4 h-100 d-flex flex-column justify-content-between">
               <span className="stat-title mb-2">Total Items</span>
               <div className="d-flex align-items-end justify-content-between">
-                <span className="stat-value">{MENU_ITEMS.length}</span>
+                <span className="stat-value">{items.length}</span>
                 <i className="bi bi-grid-fill fs-3 text-secondary opacity-50"></i>
               </div>
             </div>
@@ -103,22 +146,30 @@ const RestaurantMenuPage = () => {
               </div>
             </div>
           </div>
-           {/* Placeholder for more stats */}
         </div>
 
         {/* Categories/Filters */}
-        <div className="mb-4 animate-fade-in-up delay-2">
+        <div className="mb-4 animate-fade-in-up delay-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div className="category-pills">
-                {CATEGORIES.map(cat => (
+                <button 
+                    className={`category-pill ${activeCategory === "Todo" ? 'active' : ''}`}
+                    onClick={() => setActiveCategory("Todo")}
+                >
+                    Todo
+                </button>
+                {managedCategories.filter(c => c.isActive).map(cat => (
                     <button 
-                        key={cat}
-                        className={`category-pill ${activeCategory === cat ? 'active' : ''}`}
-                        onClick={() => setActiveCategory(cat)}
+                        key={cat.id}
+                        className={`category-pill ${activeCategory === cat.name ? 'active' : ''}`}
+                        onClick={() => setActiveCategory(cat.name)}
                     >
-                        {cat}
+                        {cat.name}
                     </button>
                 ))}
             </div>
+            <button className="btn btn-outline-secondary rounded-pill btn-sm fw-bold border-2" onClick={() => setIsCategoryModalOpen(true)}>
+                <i className="bi bi-folder-check me-2"></i>Editar Categorías
+            </button>
         </div>
 
         {/* Menu Grid */}
@@ -142,8 +193,14 @@ const RestaurantMenuPage = () => {
                   <h5 className="menu-title">{item.name}</h5>
                   <p className="menu-desc small flex-grow-1">{item.description}</p>
                   
+                  {item.extras && item.extras.length > 0 && (
+                      <div className="mt-2 mb-2">
+                          <small className="text-muted"><i className="bi bi-list-check me-1"></i>{item.extras.length} grupos de extras</small>
+                      </div>
+                  )}
+
                   <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <button className="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <button className="btn btn-sm btn-outline-secondary rounded-pill px-3" onClick={() => handleEdit(item)}>
                         <i className="bi bi-pencil me-2"></i>Editar
                     </button>
                     <div className="d-flex gap-2">
@@ -159,6 +216,22 @@ const RestaurantMenuPage = () => {
         </div>
 
       </div>
+
+      <MenuItemModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSave={handleSave}
+        initialItem={itemToEdit}
+        availableCategories={managedCategories.filter(c => c.isActive).map(c => c.name)}
+        existingItems={items}
+      />
+
+      <CategoryManagerModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        categories={categoriesWithCounts}
+        onUpdateCategories={setManagedCategories}
+      />
     </div>
   );
 };

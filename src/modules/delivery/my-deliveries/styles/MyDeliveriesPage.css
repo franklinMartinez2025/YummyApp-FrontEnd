@@ -1,0 +1,167 @@
+/* Active Delivery Mobile Theme */
+.my-deliveries-page {
+  background-color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Map Simulation */
+.map-container {
+    flex: 1;
+    background-color: #e2e8f0;
+    position: relative;
+    width: 100%;
+    min-height: 50vh;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Map_of_Miraflores_District,_Lima.png/800px-Map_of_Miraflores_District,_Lima.png'); /* Generic Map placeholder or pattern */
+    background-size: cover;
+    background-position: center;
+}
+
+.map-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-map-control {
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: none;
+    font-size: 1.2rem;
+    color: #1e293b;
+}
+
+/* Bottom Sheet */
+.delivery-sheet {
+    background: white;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+    padding: 2rem 1.5rem;
+    position: relative;
+    z-index: 10;
+    margin-top: -30px;
+}
+
+.sheet-handle {
+    width: 50px;
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin: 0 auto 1.5rem;
+}
+
+.customer-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 15px;
+}
+
+.customer-avatar {
+    width: 50px;
+    height: 50px;
+    background: #eff6ff;
+    color: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.customer-details h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.customer-details p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.delivery-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-weight: 600;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-main-action {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    background: #1e293b;
+    color: white;
+    font-weight: 700;
+    border: none;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 24px;
+    padding-right: 8px;
+}
+
+.swipe-indicator {
+    background: rgba(255,255,255,0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+/* Success Overlay (Optional) */
+.success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #10b981;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.success-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}

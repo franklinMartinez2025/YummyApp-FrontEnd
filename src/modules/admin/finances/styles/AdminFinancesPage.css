@@ -1,0 +1,172 @@
+/* Admin Finances Theme */
+.admin-finances-page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding-bottom: 4rem;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Header */
+.finances-header {
+    margin-bottom: 2rem;
+}
+
+/* Wallet Cards */
+.wallet-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+}
+
+.wallet-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05));
+    transform: skewX(-20deg);
+}
+
+.wallet-label {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.wallet-amount {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.wallet-currency {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #cbd5e1;
+}
+
+.btn-withdraw {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-withdraw:hover {
+    background: white;
+    color: #0f172a;
+}
+
+/* Commission Stats */
+.commission-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 100%;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.commission-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #f0fdf4;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Transactions Table */
+.transactions-section {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f8fafc;
+    transition: background 0.2s;
+}
+
+.transaction-item:hover {
+    background: #f8fafc;
+}
+
+.trans-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    margin-right: 1rem;
+}
+
+.trans-info h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.trans-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.trans-amount {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.amount-positive { color: #16a34a; }
+.amount-negative { color: #dc2626; }
+
+.trans-status {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-left: 1rem;
+    background: #f1f5f9;
+    color: #64748b;
+}

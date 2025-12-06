@@ -1,0 +1,209 @@
+/* ClientOrdersPage.css */
+
+.client-orders-page {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 80px); /* Ajustar según navbar */
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-in {
+    animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+/* Tabs Styling */
+.orders-tabs {
+  background: white;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  display: inline-flex;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+.tab-btn {
+  border: none;
+  background: transparent;
+  padding: 0.75rem 2rem;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+/* Order Card Styling */
+.order-card {
+  background: white;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.order-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.order-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-id {
+  font-family: 'Monaco', monospace;
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
+.order-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.order-body {
+  padding: 1.5rem;
+}
+
+.restaurant-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.restaurant-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.total-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+/* Status Timeline */
+.status-timeline {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  position: relative;
+}
+
+.status-timeline::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e9ecef;
+  z-index: 0;
+}
+
+.status-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 25%;
+  opacity: 0.5;
+  transition: all 0.5s ease;
+}
+
+.status-step.active {
+  opacity: 1;
+}
+
+.step-dot {
+  width: 26px;
+  height: 26px;
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.status-step.active .step-dot {
+  background: #20c997; /* Teal for success */
+  border-color: #20c997;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(32, 201, 151, 0.2);
+}
+
+.status-step.active ~ .status-step .step-dot {
+  /* Future steps */
+}
+
+/* Progress bar fill for active state */
+.status-line-fill {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  height: 2px;
+  background: #20c997;
+  z-index: 0;
+  transition: width 1s ease;
+}
+
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-track {
+  background: #e7f5ff;
+  color: #007bff;
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 2rem;
+  transition: all 0.2s;
+}
+
+.btn-track:hover {
+  background: #007bff;
+  color: white;
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    color: #e9ecef;
+    margin-bottom: 1rem;
+}

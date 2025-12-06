@@ -1,0 +1,157 @@
+/* AlertDialog.css */
+
+/* Overlay */
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1100; /* Higher than normal modals */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.alert-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Content */
+.alert-content {
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-overlay.open .alert-content {
+    transform: scale(1) translateY(0);
+}
+
+/* Icon Container */
+.alert-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    font-size: 2.5rem;
+    position: relative;
+}
+
+.alert-icon-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    opacity: 0.2;
+    transform: scale(1.4);
+    background: inherit;
+    z-index: -1;
+}
+
+/* Variant Styles */
+.alert-success .alert-icon-wrapper {
+    background: #e6fcf5;
+    color: #0ca678;
+}
+.alert-success .btn-confirm {
+    background: linear-gradient(135deg, #20c997 0%, #0ca678 100%);
+    box-shadow: 0 4px 15px rgba(12, 166, 120, 0.3);
+}
+
+.alert-error .alert-icon-wrapper {
+    background: #fff5f5;
+    color: #fa5252;
+}
+.alert-error .btn-confirm {
+    background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+    box-shadow: 0 4px 15px rgba(250, 82, 82, 0.3);
+}
+
+.alert-warning .alert-icon-wrapper {
+    background: #fff9db;
+    color: #fcc419;
+}
+.alert-warning .btn-confirm {
+    background: linear-gradient(135deg, #ffd43b 0%, #fcc419 100%);
+    box-shadow: 0 4px 15px rgba(252, 196, 25, 0.3);
+    color: #212529 !important;
+}
+
+.alert-info .alert-icon-wrapper {
+    background: #e7f5ff;
+    color: #339af0;
+}
+.alert-info .btn-confirm {
+    background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+    box-shadow: 0 4px 15px rgba(51, 154, 240, 0.3);
+}
+
+/* Typography */
+.alert-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #212529;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.alert-message {
+    color: #868e96;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+/* Actions */
+.alert-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.alert-btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.2s ease;
+    flex: 1;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.btn-confirm {
+    color: white;
+}
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    filter: brightness(110%);
+}
+
+.btn-cancel-alert {
+    background: #f1f3f5;
+    color: #495057;
+}
+.btn-cancel-alert:hover {
+    background: #e9ecef;
+    color: #212529;
+}
