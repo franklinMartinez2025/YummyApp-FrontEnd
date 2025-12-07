@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react';
 import '../styles/CategoryManagerModal.css';
+import type { GenericItemName } from '../../../../shared/types/common';
 
-export interface Category {
-  id: string;
-  name: string;
-  isActive: boolean;
-  productCount: number;
-}
 
 interface CategoryManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categories: Category[];
-  onUpdateCategories: (newCategories: Category[]) => void;
+  categories: GenericItemName[];
+  onUpdateCategories: (newCategories: GenericItemName[]) => void;
 }
 
 export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCategories }: CategoryManagerModalProps) => {
-    const [localCategories, setLocalCategories] = useState<Category[]>([]);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [localCategories, setLocalCategories] = useState<GenericItemName[]>([]);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [isAdding, setIsAdding] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
@@ -30,19 +25,7 @@ export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCate
         }
     }, [isOpen, categories]);
 
-    const handleToggleStatus = (id: string) => {
-        const updated = localCategories.map(cat => 
-            cat.id === id ? { ...cat, isActive: !cat.isActive } : cat
-        );
-        setLocalCategories(updated);
-        onUpdateCategories(updated);
-    };
-
-    const handleDelete = (id: string, count: number) => {
-        if (count > 0) {
-            alert("⚠️ No puedes eliminar una categoría con productos asociados. (RF-REST-003)");
-            return;
-        }
+    const handleDelete = (id: number) => {
         if (window.confirm("¿Seguro que deseas eliminar esta categoría?")) {
             const updated = localCategories.filter(cat => cat.id !== id);
             setLocalCategories(updated);
@@ -50,7 +33,7 @@ export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCate
         }
     };
 
-    const startEdit = (cat: Category) => {
+    const startEdit = (cat: GenericItemName) => {
         setEditingId(cat.id);
         setEditName(cat.name);
     };
@@ -67,11 +50,9 @@ export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCate
 
     const handleAdd = () => {
         if (!newCategoryName.trim()) return;
-        const newCat: Category = {
-            id: Date.now().toString(),
+        const newCat: GenericItemName = {
+            id: Math.floor(Math.random() * 1000000),
             name: newCategoryName,
-            isActive: true,
-            productCount: 0
         };
         const updated = [...localCategories, newCat];
         setLocalCategories(updated);
@@ -125,7 +106,7 @@ export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCate
                     {/* List */}
                     <div className="categories-list d-flex flex-column gap-2">
                         {localCategories.map(cat => (
-                            <div key={cat.id} className={`category-item p-3 rounded-3 border d-flex justify-content-between align-items-center ${!cat.isActive ? 'bg-light opacity-75' : 'bg-white'}`}>
+                            <div key={cat.id} className={`category-item p-3 rounded-3 border d-flex justify-content-between align-items-center`}>
                                 
                                 {editingId === cat.id ? (
                                     <div className="d-flex gap-2 flex-grow-1 me-2">
@@ -141,18 +122,8 @@ export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCate
                                     </div>
                                 ) : (
                                     <div className="d-flex align-items-center gap-3">
-                                        <div className="form-check form-switch">
-                                            <input 
-                                                className="form-check-input" 
-                                                type="checkbox" 
-                                                checked={cat.isActive} 
-                                                onChange={() => handleToggleStatus(cat.id)}
-                                                title="Activar/Desactivar (RF-REST-004)"
-                                            />
-                                        </div>
                                         <div>
                                             <h6 className="mb-0 fw-bold">{cat.name}</h6>
-                                            <small className="text-muted">{cat.productCount} productos</small>
                                         </div>
                                     </div>
                                 )}
@@ -162,10 +133,9 @@ export const CategoryManagerModal = ({ isOpen, onClose, categories, onUpdateCate
                                         <i className="bi bi-pencil"></i>
                                     </button>
                                     <button 
-                                        className={`btn btn-sm btn-link ${cat.productCount > 0 ? 'text-muted' : 'text-danger'}`} 
-                                        onClick={() => handleDelete(cat.id, cat.productCount)}
-                                        disabled={cat.productCount > 0}
-                                        title={cat.productCount > 0 ? "No se puede eliminar con productos asociados" : "Eliminar (RF-REST-003)"}
+                                        className={`btn btn-sm btn-link text-danger`} 
+                                        onClick={() => handleDelete(cat.id)}
+                                        title="Eliminar (RF-REST-003)"
                                     >
                                         <i className="bi bi-trash"></i>
                                     </button>

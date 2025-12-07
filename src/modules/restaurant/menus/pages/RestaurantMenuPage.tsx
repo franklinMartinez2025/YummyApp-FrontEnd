@@ -2,128 +2,123 @@ import { useState, useMemo, useEffect } from 'react';
 import '../../menus/styles/RestaurantMenuPage.css';
 import { MenuItemModal } from '../components/MenuItemModal';
 import { CategoryManagerModal } from '../components/CategoryManagerModal';
-import { ExtrasLibrary, type ModifierItem, type ModifierGroup } from '../components/ExtrasLibrary';
-import type { MenuItem } from '../components/MenuItemModal';
-import type { Category } from '../components/CategoryManagerModal';
+import { ExtrasLibrary} from '../components/ExtrasLibrary';
 import { MenuService } from '../../../../core/application/services/Restaurant/MenuService';
 import { MenuAdapter } from '../../../../core/infrastructure/adapters/restaurant/MenuAdapter';
+import type { GenericItemName } from '../../../../shared/types/common';
+import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/FoodItem.dto';
+import type { ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
+import { LoadingSpinner } from '../../../../shared/ui/LoadingSpinner/LoadingSpinner';
 
 const RestaurantMenuPage = () => {
-
   const [activeSection, setActiveSection] = useState<'menu' | 'library'>('menu');
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [managedCategories, setManagedCategories] = useState<Category[]>([]);
-  const [modifierItems, setModifierItems] = useState<ModifierItem[]>([]);
-  const [modifierGroups, setModifierGroups] = useState<ModifierGroup[]>([]);
+  const [items, setItems] = useState<FoodItemDto[]>([]);
+  const [categories, setCategories] = useState<GenericItemName[]>([]);
+  const [modifierItems, setModifierItems] = useState<GenericItemName[]>([]);
+  const [modifierGroups, setModifierGroups] = useState<ModifierGroupsTemplateDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
+  // Restore missing state variables
   const [activeCategory, setActiveCategory] = useState("Todo");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [itemToEdit, setItemToEdit] = useState<MenuItem | undefined>(undefined);
+  const [itemToEdit, setItemToEdit] = useState<FoodItemDto | undefined>(undefined);
 
+  // Restore menuService
   const menuService = useMemo(() => new MenuService(new MenuAdapter()), []);
+  
   const RESTAURANT_ID = 1;
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            const response = await menuService.getInitialData(RESTAURANT_ID);       
-            if (response.success && response.data) {
-                const data = response.data;
-                const mappedCategories: Category[] = data.categories.map(c => ({
-                    id: c.id.toString(),
-                    name: c.name,
-                    isActive: true,
-                    productCount: 0
-                }));
-
-                const mappedItems: MenuItem[] = data.foodItems.map(f => ({
-                    id: f.dishId,
-                    name: f.dishName,
-                    description: f.description,
-                    price: f.price,
-                    image: f.imageUrl || '',
-                    category: f.categoryName,
-                    status: f.isActive ? 'Activo' : 'Agotado',
-                    extras: [], 
-                    preparationTime: 15,
-                    isStockManaged: false,
-                    stock: 0,
-                    isVisible: true,
-                    isRecommended: false,
-                    isPopular: false,
-                    availableDays: []
-                }));
-
-                const mappedModifierItems: ModifierItem[] = data.components.map(c => ({
-                    id: c.id.toString(), 
-                    name: c.name
-                }));
-
-                const mappedModifierGroups: ModifierGroup[] = data.modifierGroupsTemplates.map(g => ({
-                    id: g.groupId.toString(),
-                    name: g.groupName,
-                    minSelection: 0,
-                    maxSelection: 1,
-                    options: g.options.map(o => ({
-                        id: o.optionId.toString(),
-                        itemId: o.itemId.toString(),
-                        price: o.price
-                    }))
-                }));
-
-                setManagedCategories(mappedCategories);
-                setItems(mappedItems);
-                setModifierItems(mappedModifierItems);
-                setModifierGroups(mappedModifierGroups);
-            } else {
-                setError(response.message || "Error al cargar datos del menú");
+            const response = await menuService.getInitialData(RESTAURANT_ID); 
+            console.log("🔍 Respuesta cruda del servicio:", response);
+      
+            if (isMounted) {
+                if (response && response.success && response.data) {
+                    console.log('Categorías:', response.data.categories);
+                    setCategories(response.data.categories);
+                    setItems(response.data.foodItems);
+                    setModifierItems(response.data.components);
+                    setModifierGroups(response.data.modifierGroupsTemplates);
+                } else {
+                    console.warn("⚠️ La respuesta no tiene el formato esperado o success es falso:", response);
+                    setError("No se pudieron cargar los datos del menú.");
+                }
             }
         } catch (err) {
-            console.error(err);
-            setError("Error de conexión al cargar el menú");
+            if (isMounted) {
+                console.error(err);
+                setError("Ocurrió un error al cargar el menú. Por favor intente nuevamente.");
+            }
         } finally {
-            setLoading(false);
+            if (isMounted) {
+                setLoading(false);
+            }
         }
     };
 
     fetchData();
+
+    return () => {
+        isMounted = false;
+    };
   }, [menuService]);
 
   // Calculate product counts dynamically for validation
   const categoriesWithCounts = useMemo(() => {
-      return managedCategories.map(cat => ({
+      return categories.map(cat => ({
           ...cat,
-          productCount: items.filter(i => i.category === cat.name).length
+          productCount: items.filter(i => i.categoryName === cat.name).length
       }));
-  }, [items, managedCategories]);
+  }, [items, categories]);
 
   const filteredItems = activeCategory === "Todo" 
     ? items 
-    : items.filter(item => item.category === activeCategory);
+    : items.filter(item => item.categoryName === activeCategory);
 
   const handleCreate = () => {
       setItemToEdit(undefined);
       setIsModalOpen(true);
   };
 
-  const handleEdit = (item: MenuItem) => {
+  const handleEdit = (item: FoodItemDto) => {
       setItemToEdit(item);
       setIsModalOpen(true);
   };
 
-  const handleSave = (item: MenuItem) => {
+  const handleSave = (item: FoodItemDto) => {
       // TODO: Implement Backend Save
       if (itemToEdit) {
-          setItems(prev => prev.map(i => i.id === itemToEdit.id ? { ...item, id: itemToEdit.id } : i));
+          setItems(prev => prev.map(i => i.dishId === itemToEdit.dishId ? { ...item, dishId: itemToEdit.dishId } : i));
       } else {
-          setItems(prev => [...prev, { ...item, id: Date.now() }]);
+          setItems(prev => [...prev, { ...item, dishId: Date.now() }]);
       }
       setIsModalOpen(false);
   };
+
+  if (loading) {
+      return <LoadingSpinner fullHeight message="Cargando menú..." />;
+  }
+
+  if (error) {
+      return (
+          <div className="d-flex justify-content-center align-items-center vh-100">
+              <div className="alert alert-danger text-center shadow p-5" role="alert">
+                  <h4 className="alert-heading mb-3"><i className="bi bi-exclamation-triangle-fill me-2"></i>Error</h4>
+                  <p className="mb-0">{error}</p>
+                  <button className="btn btn-outline-danger mt-3" onClick={() => window.location.reload()}>
+                      Reintentar
+                  </button>
+              </div>
+          </div>
+      );
+  }
 
   return (
     <div className="restaurant-menu-page p-4">
@@ -196,7 +191,7 @@ const RestaurantMenuPage = () => {
                         >
                             Todo
                         </button>
-                        {managedCategories.map(cat => (
+                        {categories.map(cat => (
                             <button 
                                 key={cat.id}
                                 className={`category-pill ${activeCategory === cat.name ? 'active' : ''}`}
@@ -214,22 +209,22 @@ const RestaurantMenuPage = () => {
                 {/* Menu Grid */}
                 <div className="row g-4 animate-fade-in-up delay-3">
                   {filteredItems.map((item) => (
-                    <div key={item.id} className="col-12 col-md-6 col-lg-4 col-xl-3">
+                    <div key={item.dishId} className="col-12 col-md-6 col-lg-4 col-xl-3">
                       <div className="menu-card h-100 d-flex flex-column">
                         <div className="menu-img-wrapper">
-                          <img src={item.image} alt={item.name} className="menu-img" />
+                          <img src={item.imageUrl??""} alt={item.dishName} className="menu-img" />
                           <span className="price-tag">${item.price.toFixed(2)}</span>
                         </div>
                         
                         <div className="menu-body flex-grow-1 d-flex flex-column">
                             <div className="d-flex justify-content-between align-items-start mb-2">
-                                <span className="badge bg-light text-secondary border">{item.category}</span>
-                                <span className={`status-badge ${item.status === 'Agotado' ? 'bg-danger text-white' : ''}`}>
-                                    {item.status}
+                                <span className="badge bg-light text-secondary border">{item.categoryName}</span>
+                                <span className={`status-badge ${item.isActive === false ? 'bg-danger text-white' : ''}`}>
+                                    {item.isActive ? 'Activo' : 'Inactivo'}
                                 </span>
                             </div>
                           
-                          <h5 className="menu-title">{item.name}</h5>
+                          <h5 className="menu-title">{item.dishName}</h5>
                           <p className="menu-desc small flex-grow-1">{item.description}</p>
                           
                           {item.extras && item.extras.length > 0 && (
@@ -263,7 +258,7 @@ const RestaurantMenuPage = () => {
         onClose={() => setIsModalOpen(false)} 
         onSave={handleSave}
         initialItem={itemToEdit}
-        availableCategories={managedCategories.map(c => c.name)}
+        availableCategories={categories.map(c => c.name)}
         existingItems={items}
         // Pass library data so Modal can use it
         availableGroups={modifierGroups}
@@ -274,11 +269,12 @@ const RestaurantMenuPage = () => {
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
         categories={categoriesWithCounts}
-        onUpdateCategories={setManagedCategories}
+        onUpdateCategories={setCategories}
       />
     </div>
   );
 };
 
 export default RestaurantMenuPage;
+
 

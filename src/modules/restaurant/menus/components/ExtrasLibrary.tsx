@@ -1,28 +1,14 @@
 import { useState } from 'react';
+import type { GenericItemName } from '../../../../shared/types/common';
+import type { ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
 
-// Data Models
-export interface ModifierItem {
-    id: string;
-    name: string;
-}
 
-export interface ModifierGroup {
-    id: string;
-    name: string;
-    minSelection: number;
-    maxSelection: number;
-    options: {
-        id: string; // Unique ID for this option in the group
-        itemId: string; // Reference to ModifierItem
-        price: number;
-    }[];
-}
 
 interface ExtrasLibraryProps {
-    items: ModifierItem[];
-    setItems: React.Dispatch<React.SetStateAction<ModifierItem[]>>;
-    groups: ModifierGroup[];
-    setGroups: React.Dispatch<React.SetStateAction<ModifierGroup[]>>;
+    items: GenericItemName[];
+    setItems: React.Dispatch<React.SetStateAction<GenericItemName[]>>;
+    groups: ModifierGroupsTemplateDto[];
+    setGroups: React.Dispatch<React.SetStateAction<ModifierGroupsTemplateDto[]>>;
 }
 
 export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibraryProps) => {
@@ -32,25 +18,25 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
     const [newItemName, setNewItemName] = useState('');
 
     // Group Editor State
-    const [editingGroup, setEditingGroup] = useState<ModifierGroup | null>(null);
+    const [editingGroup, setEditingGroup] = useState<ModifierGroupsTemplateDto | null>(null);
 
     // -- Item Handlers --
     const handleAddItem = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newItemName.trim()) return;
-        setItems(prev => [...prev, { id: Date.now().toString(), name: newItemName.trim() }]);
+        setItems(prev => [...prev, { id: Math.floor(Math.random() * 1000000), name: newItemName.trim() }]);
         setNewItemName('');
     };
 
-    const handleDeleteItem = (id: string) => {
+    const handleDeleteItem = (id: number) => {
         // Warning: In specific implementations, check if used in groups first
         setItems(prev => prev.filter(i => i.id !== id));
     };
 
     // -- Group Handlers --
     const handleCreateGroup = () => {
-        const newGroup: ModifierGroup = {
-            id: Date.now().toString(),
+        const newGroup: ModifierGroupsTemplateDto = {
+            id: Math.floor(Math.random() * 1000000),
             name: 'Nuevo Grupo',
             minSelection: 1,
             maxSelection: 1,
@@ -67,7 +53,7 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
         }
     };
 
-    const addItemToGroup = (itemId: string) => {
+    const addItemToGroup = (itemId: number) => {
         if (!editingGroup) return;
         const item = items.find(i => i.id === itemId);
         if (!item) return;
@@ -75,8 +61,9 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
         setEditingGroup({
             ...editingGroup,
             options: [...editingGroup.options, {
-                id: Date.now().toString(),
+                id: Math.floor(Math.random() * 1000000),
                 itemId: item.id,
+                itemName: item.name,
                 price: 0
             }]
         });

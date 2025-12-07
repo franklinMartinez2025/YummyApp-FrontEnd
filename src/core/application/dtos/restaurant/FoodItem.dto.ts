@@ -1,3 +1,5 @@
+import type { ModifierGroupsTemplateDto } from "./ModifierGroupsTemplate.dto";
+
 export interface FoodItemDto {
     /**
      * Identificador del plato
@@ -33,6 +35,26 @@ export interface FoodItemDto {
      * Indica si el plato está activo
      */
     isActive: boolean;
+
+    /**
+     * Tiempo de preparación
+     */
+    preparationTime: number;
+
+    /**
+     * Indica si se gestiona el stock
+     */
+    isStockManaged: boolean;
+
+    /**
+     * Stock disponible
+     */
+    stock: number;
+
+    /**
+     * Lista de grupos de modificadores (extras)
+     */
+    extras:ModifierGroupsTemplateDto[]; 
 
     /**
      * Precio del plato

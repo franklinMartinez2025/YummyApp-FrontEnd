@@ -1,38 +1,23 @@
 export interface ModifierGroupsTemplateDto {
-    /**
-     * Identificador del grupo
-     */
-    groupId: number;
+    
+    id: number;
 
-    /**
-     * Nombre del grupo de modificadores
-     */
-    groupName: string;
+    name: string;
 
-    /**
-     * Lista de opciones del grupo
-     */
+    minSelection: number;
+
+    maxSelection: number;
+
     options: ModifierGroupsOptionDto[];
 }
 
 export interface ModifierGroupsOptionDto {
-    /**
-     * Identificador de la opción
-     */
-    optionId: number;
+    
+    id: number;
 
-    /**
-     * Identificador del ítem asociado
-     */
     itemId: number;
 
-    /**
-     * Nombre del ítem asociado
-     */
     itemName: string;
 
-    /**
-     * Precio adicional o modificador
-     */
     price: number;
 }

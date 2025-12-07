@@ -34,7 +34,7 @@ export const RoleBasedLayout = () => {
     return <ClientLayout />;
   }
 
-  const currentRole = activeRole?.toLowerCase() || '';
+  const currentRole = (typeof activeRole === 'string' ? activeRole : '').toLowerCase();
 
   // Renderizar el layout correspondiente
   let LayoutComponent = ClientLayout;

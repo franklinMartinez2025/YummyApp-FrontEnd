@@ -13,7 +13,7 @@ export const RoleAccessGuard = () => {
     }
 
     /** Si está autenticado pero NO tiene rol activo */
-    if (isAuthenticated && !activeRole) {
+    if (isAuthenticated && (!activeRole || typeof activeRole !== 'string')) {
         // Si tiene múltiples roles, OBLIGAR a seleccionar uno
         if (user?.roles && user.roles.length > 1) {
             return (
@@ -33,7 +33,7 @@ export const RoleAccessGuard = () => {
         return <Outlet />;
     }
 
-    const normalizedRole = activeRole.toLowerCase();
+    const normalizedRole = (activeRole as string).toLowerCase();
     const path = location.pathname.toLowerCase();
 
     /** Acceso exclusivo para Administrador General */
