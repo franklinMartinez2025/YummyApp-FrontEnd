@@ -1,119 +1,97 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import '../../menus/styles/RestaurantMenuPage.css';
 import { MenuItemModal } from '../components/MenuItemModal';
 import { CategoryManagerModal } from '../components/CategoryManagerModal';
 import { ExtrasLibrary, type ModifierItem, type ModifierGroup } from '../components/ExtrasLibrary';
 import type { MenuItem } from '../components/MenuItemModal';
 import type { Category } from '../components/CategoryManagerModal';
-
-// Mock Data
-const INITIAL_MENU_ITEMS: MenuItem[] = [
-  {
-    id: 1,
-    name: "Hamburguesa Yummy Supreme",
-    description: "Carne angus 200g, queso cheddar derretido, cebolla caramelizada y nuestra salsa especial.",
-    price: 12.99,
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop",
-    category: "Platos Fuertes",
-    status: "Activo"
-  },
-  {
-    id: 2,
-    name: "Pizza Napolitana Clásica",
-    description: "Masa madre fermentada 48h, tomate San Marzano, mozzarella di bufala y albahaca fresca.",
-    price: 15.50,
-    image: "https://images.unsplash.com/photo-1574071318500-d0d580426632?q=80&w=600&auto=format&fit=crop",
-    category: "Platos Fuertes",
-    status: "Activo"
-  },
-  {
-    id: 3,
-    name: "Ensalada César con Pollo",
-    description: "Lechuga romana crujiente, pechuga de pollo grillada, parmesano reggiano y croutones caseros.",
-    price: 9.99,
-    image: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?q=80&w=600&auto=format&fit=crop",
-    category: "Entradas",
-    status: "Activo"
-  },
-  {
-    id: 4,
-    name: "Limonada de Frutos Rojos",
-    description: "Refrescante mezcla de limón sutil, fresas, frambuesas y un toque de menta.",
-    price: 4.50,
-    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=600&auto=format&fit=crop",
-    category: "Bebidas",
-    status: "Activo"
-  },
-  {
-    id: 5,
-    name: "Tacos al Pastor",
-    description: "3 piezas de tortillas de maíz hechas a mano, cerdo marinado estilo pastor y piña.",
-    price: 8.00,
-    image: "https://images.unsplash.com/photo-1599321955726-9080d944c20c?q=80&w=600&auto=format&fit=crop",
-    category: "Platos Fuertes",
-    status: "Agotado"
-  },
-  {
-    id: 6,
-    name: "Cheesecake de New York",
-    description: "Cremoso pastel de queso estilo NY con una base de galleta y coulis de frutos del bosque.",
-    price: 6.50,
-    image: "https://images.unsplash.com/photo-1508737027454-e6454ef45afd?q=80&w=600&auto=format&fit=crop",
-    category: "Postres",
-    status: "Activo"
-  }
-];
-
-const INITIAL_CATEGORIES: Category[] = [
-    { id: '1', name: 'Entradas', isActive: true, productCount: 1 },
-    { id: '2', name: 'Platos Fuertes', isActive: true, productCount: 3 },
-    { id: '3', name: 'Bebidas', isActive: true, productCount: 1 },
-    { id: '4', name: 'Postres', isActive: true, productCount: 1 },
-];
-
-const INITIAL_MODIFIER_ITEMS: ModifierItem[] = [
-    { id: '1', name: 'Sopa de Pollo' },
-    { id: '2', name: 'Papa a la Huancaína' },
-    { id: '3', name: 'Ceviche Pequeño' },
-    { id: '4', name: 'Arroz con Pollo' },
-    { id: '5', name: 'Lomo Saltado' },
-    { id: '6', name: 'Cocona' },
-    { id: '7', name: 'Chicha Morada' },
-    { id: '8', name: 'Gelatina' }
-];
-
-const INITIAL_MODIFIER_GROUPS: ModifierGroup[] = [
-    { 
-        id: '1', name: 'Entradas Menú', minSelection: 1, maxSelection: 1, 
-        options: [
-            { id: '101', itemId: '1', price: 0 },
-            { id: '102', itemId: '2', price: 0 },
-            { id: '103', itemId: '3', price: 2.00 }
-        ]
-    },
-    { 
-        id: '2', name: 'Bebidas Menú', minSelection: 1, maxSelection: 1, 
-        options: [
-            { id: '201', itemId: '6', price: 0 },
-            { id: '202', itemId: '7', price: 0 }
-        ]
-    }
-];
+import { MenuService } from '../../../../core/application/services/Restaurant/MenuService';
+import { MenuAdapter } from '../../../../core/infrastructure/adapters/restaurant/MenuAdapter';
 
 const RestaurantMenuPage = () => {
+
   const [activeSection, setActiveSection] = useState<'menu' | 'library'>('menu');
-  
-  const [items, setItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
-  const [managedCategories, setManagedCategories] = useState<Category[]>(INITIAL_CATEGORIES);
-  
-  // Library State
-  const [modifierItems, setModifierItems] = useState<ModifierItem[]>(INITIAL_MODIFIER_ITEMS);
-  const [modifierGroups, setModifierGroups] = useState<ModifierGroup[]>(INITIAL_MODIFIER_GROUPS);
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [managedCategories, setManagedCategories] = useState<Category[]>([]);
+  const [modifierItems, setModifierItems] = useState<ModifierItem[]>([]);
+  const [modifierGroups, setModifierGroups] = useState<ModifierGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [activeCategory, setActiveCategory] = useState("Todo");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false); // NEW STATE
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<MenuItem | undefined>(undefined);
+
+  const menuService = useMemo(() => new MenuService(new MenuAdapter()), []);
+  const RESTAURANT_ID = 1;
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await menuService.getInitialData(RESTAURANT_ID);       
+            if (response.success && response.data) {
+                const data = response.data;
+                const mappedCategories: Category[] = data.categories.map(c => ({
+                    id: c.id.toString(),
+                    name: c.name,
+                    isActive: true,
+                    productCount: 0
+                }));
+
+                const mappedItems: MenuItem[] = data.foodItems.map(f => ({
+                    id: f.dishId,
+                    name: f.dishName,
+                    description: f.description,
+                    price: f.price,
+                    image: f.imageUrl || '',
+                    category: f.categoryName,
+                    status: f.isActive ? 'Activo' : 'Agotado',
+                    extras: [], 
+                    preparationTime: 15,
+                    isStockManaged: false,
+                    stock: 0,
+                    isVisible: true,
+                    isRecommended: false,
+                    isPopular: false,
+                    availableDays: []
+                }));
+
+                const mappedModifierItems: ModifierItem[] = data.components.map(c => ({
+                    id: c.id.toString(), 
+                    name: c.name
+                }));
+
+                const mappedModifierGroups: ModifierGroup[] = data.modifierGroupsTemplates.map(g => ({
+                    id: g.groupId.toString(),
+                    name: g.groupName,
+                    minSelection: 0,
+                    maxSelection: 1,
+                    options: g.options.map(o => ({
+                        id: o.optionId.toString(),
+                        itemId: o.itemId.toString(),
+                        price: o.price
+                    }))
+                }));
+
+                setManagedCategories(mappedCategories);
+                setItems(mappedItems);
+                setModifierItems(mappedModifierItems);
+                setModifierGroups(mappedModifierGroups);
+            } else {
+                setError(response.message || "Error al cargar datos del menú");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Error de conexión al cargar el menú");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchData();
+  }, [menuService]);
 
   // Calculate product counts dynamically for validation
   const categoriesWithCounts = useMemo(() => {
@@ -138,11 +116,10 @@ const RestaurantMenuPage = () => {
   };
 
   const handleSave = (item: MenuItem) => {
+      // TODO: Implement Backend Save
       if (itemToEdit) {
-          // Update
           setItems(prev => prev.map(i => i.id === itemToEdit.id ? { ...item, id: itemToEdit.id } : i));
       } else {
-          // Create
           setItems(prev => [...prev, { ...item, id: Date.now() }]);
       }
       setIsModalOpen(false);
@@ -219,7 +196,7 @@ const RestaurantMenuPage = () => {
                         >
                             Todo
                         </button>
-                        {managedCategories.filter(c => c.isActive).map(cat => (
+                        {managedCategories.map(cat => (
                             <button 
                                 key={cat.id}
                                 className={`category-pill ${activeCategory === cat.name ? 'active' : ''}`}
@@ -286,7 +263,7 @@ const RestaurantMenuPage = () => {
         onClose={() => setIsModalOpen(false)} 
         onSave={handleSave}
         initialItem={itemToEdit}
-        availableCategories={managedCategories.filter(c => c.isActive).map(c => c.name)}
+        availableCategories={managedCategories.map(c => c.name)}
         existingItems={items}
         // Pass library data so Modal can use it
         availableGroups={modifierGroups}

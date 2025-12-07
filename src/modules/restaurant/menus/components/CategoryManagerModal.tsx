@@ -5,7 +5,7 @@ export interface Category {
   id: string;
   name: string;
   isActive: boolean;
-  productCount: number; // For validation RF-REST-003
+  productCount: number;
 }
 
 interface CategoryManagerModalProps {

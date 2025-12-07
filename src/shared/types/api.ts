@@ -1,5 +1,5 @@
 export interface Response<T> {
-  succeeded: boolean;
+  success: boolean;
 
   message: string | null;
 

@@ -51,7 +51,10 @@ interface MenuItemModalProps {
 }
 
 const DEFAULT_CATEGORIES = ["Entradas", "Platos Fuertes", "Bebidas", "Postres"];
-
+const DAYS_OF_WEEK = [
+    { key: 'Mon', label: 'L' }, { key: 'Tue', label: 'M' }, { key: 'Wed', label: 'X' },
+    { key: 'Thu', label: 'J' }, { key: 'Fri', label: 'V' }, { key: 'Sat', label: 'S' }, { key: 'Sun', label: 'D' }
+];
 
 export const MenuItemModal = ({ 
     isOpen, onClose, onSave, initialItem, 
@@ -62,7 +65,7 @@ export const MenuItemModal = ({
         name: '', description: '', price: 0, image: '', category: availableCategories[0] || '', status: 'Activo', 
         extras: [], // Default empty
         preparationTime: 15, isStockManaged: false, stock: 0, isRecommended: false, isPopular: false, 
-        availableDays: [],
+        availableDays: DAYS_OF_WEEK.map(d => d.key),
         isVisible: true
     });
 
@@ -97,7 +100,7 @@ export const MenuItemModal = ({
                 name: '', description: '', price: 0, image: '', category: categories[0] || '', status: 'Activo', 
                 extras: [],
                 preparationTime: 15, isStockManaged: false, stock: 0, isRecommended: false, isPopular: false, 
-                availableDays: [],
+                availableDays: DAYS_OF_WEEK.map(d => d.key),
                 isVisible: true
             });
         }
@@ -121,7 +124,17 @@ export const MenuItemModal = ({
         if (name === 'name') setError(null);
     };
 
-
+    const toggleDay = (dayKey: string) => {
+        setFormData(prev => {
+            const current = prev.availableDays || [];
+            return {
+                ...prev,
+                availableDays: current.includes(dayKey) 
+                    ? current.filter(d => d !== dayKey) 
+                    : [...current, dayKey]
+            };
+        });
+    };
 
     const updateOption = (groupIndex: number, optionIndex: number, field: keyof ExtraOption, value: any) => {
         const newExtras = [...(formData.extras || [])];
@@ -225,30 +238,25 @@ export const MenuItemModal = ({
                         {activeTab === 'info' ? (
                             <div className="row g-3">
                                 { /* Name & Category */ }
-                                { /* Name & Category */ }
-                                <div className="col-12">
-                                    <div className="row g-3">
-                                        <div className="col-md-7">
-                                            <div className="input-group-custom">
-                                                <label className="form-label-custom">Nombre</label>
-                                                <input type="text" className="form-control-custom" name="name" value={formData.name} onChange={handleChange} required placeholder="Ej. Lomo Saltado" />
-                                            </div>
-                                        </div>
-                                        <div className="col-md-5">
-                                            <div className="input-group-custom">
-                                                <label className="form-label-custom">Categoría</label>
-                                                <div className="d-flex gap-2">
-                                                    {isAddingCategory ? (
-                                                        <input type="text" className="form-control-custom animate-fade-in" name="category" value={formData.category} onChange={handleChange} placeholder="Nueva..." autoFocus />
-                                                    ) : (
-                                                        <select className="form-control-custom" name="category" value={formData.category} onChange={handleChange} style={{flex: 1}}>
-                                                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                                        </select>
-                                                    )}
-                                                    <button type="button" className={`btn ${isAddingCategory ? 'btn-danger' : 'btn-outline-primary'} rounded-3 px-3`} onClick={() => setIsAddingCategory(!isAddingCategory)}>
-                                                        <i className={`bi ${isAddingCategory ? 'bi-x-lg' : 'bi-plus-lg'}`}></i>
-                                                    </button>
-                                                </div>
+                                <div className="col-md-6">
+                                    <div className="input-group-custom">
+                                        <label className="form-label-custom">Nombre</label>
+                                        <input type="text" className="form-control-custom" name="name" value={formData.name} onChange={handleChange} required placeholder="Ej. Lomo Saltado" />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="input-group-custom">
+                                            <label className="form-label-custom">Categoría</label>
+                                            <div className="d-flex gap-2">
+                                                {isAddingCategory ? (
+                                                    <input type="text" className="form-control-custom animate-fade-in" name="category" value={formData.category} onChange={handleChange} placeholder="Nueva..." autoFocus />
+                                                ) : (
+                                                    <select className="form-control-custom" name="category" value={formData.category} onChange={handleChange}>
+                                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                                    </select>
+                                                )}
+                                                <button type="button" className={`btn ${isAddingCategory ? 'btn-danger' : 'btn-outline-primary'} rounded-3 px-3`} onClick={() => setIsAddingCategory(!isAddingCategory)}>
+                                                    <i className={`bi ${isAddingCategory ? 'bi-x-lg' : 'bi-plus-lg'}`}></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -285,17 +293,51 @@ export const MenuItemModal = ({
                                     </div>
                                 </div>
 
-                                { /* Stock Management Only */ }
-                                <div className="col-12 d-flex align-items-center bg-light p-3 rounded-3 border">
+                                { /* Availability (RF-REST-022) */ }
+                                <div className="col-12">
+                                    <label className="form-label-custom mb-1">Disponibilidad Semanal</label>
+                                    <div className="d-flex gap-2">
+                                        {DAYS_OF_WEEK.map(day => (
+                                            <button 
+                                                key={day.key} 
+                                                type="button"
+                                                className={`btn btn-sm rounded-circle ${formData.availableDays?.includes(day.key) ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                style={{width: '32px', height: '32px', padding: 0}}
+                                                onClick={() => toggleDay(day.key)}
+                                            >
+                                                {day.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                { /* Stock & Tags (RF-REST-013, 015) */ }
+                                <div className="col-12 d-flex flex-wrap gap-4 align-items-center bg-light p-3 rounded-3 border">
                                     <div className="form-check form-switch">
                                         <input className="form-check-input" type="checkbox" id="stockSwitch" name="isStockManaged" checked={formData.isStockManaged} onChange={handleChange} />
                                         <label className="form-check-label fw-bold small" htmlFor="stockSwitch">Gestionar Stock</label>
                                     </div>
                                     {formData.isStockManaged && (
-                                        <div className="animate-fade-in ms-3" style={{width: '120px'}}>
+                                        <div className="animate-fade-in" style={{width: '120px'}}>
                                             <input type="number" className="form-control form-control-sm border-secondary" name="stock" value={formData.stock} onChange={handleChange} placeholder="Cant." />
                                         </div>
                                     )}
+                                    <div className="vr mx-2"></div>
+                                    <div className="form-check form-switch">
+                                        <input className="form-check-input" type="checkbox" id="recSwitch" name="isRecommended" checked={formData.isRecommended} onChange={handleChange} />
+                                        <label className="form-check-label badge bg-warning text-dark cursor-pointer" htmlFor="recSwitch">⭐ Recomendado</label>
+                                    </div>
+                                    <div className="form-check form-switch">
+                                        <input className="form-check-input" type="checkbox" id="popSwitch" name="isPopular" checked={formData.isPopular} onChange={handleChange} />
+                                        <label className="form-check-label badge bg-danger cursor-pointer" htmlFor="popSwitch">🔥 Popular</label>
+                                    </div>
+                                    <div className="vr mx-2"></div>
+                                    <div className="form-check form-switch" title="Si se desactiva, el producto no aparecerá en el menú público (ideal para items base de combos)">
+                                        <input className="form-check-input" type="checkbox" id="visibleSwitch" name="isVisible" checked={formData.isVisible !== false} onChange={handleChange} />
+                                        <label className="form-check-label fw-bold text-success cursor-pointer" htmlFor="visibleSwitch">
+                                            {formData.isVisible !== false ? <><i className="bi bi-eye-fill me-1"></i>Visible al Público</> : <><i className="bi bi-eye-slash-fill me-1 text-muted"></i>Oculto al Público</>}
+                                        </label>
+                                    </div>
                                 </div>
 
                                 { /* Image */ }
@@ -309,7 +351,7 @@ export const MenuItemModal = ({
                                             <img src={formData.image} alt="Preview" style={{height: '100%', objectFit: 'cover'}} />
                                         </div>
                                     )}
-                                </div> 
+                                </div>
                             </div>
                         ) : (
                             <div className="extras-management animate-fade-in-up">
