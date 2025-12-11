@@ -1,27 +1,27 @@
 import { useState, useMemo } from 'react';
 import '../styles/MenuItemModal.css'; // Re-use styles
-import type { MenuItem } from '../../MenuItemModal';
+import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/FoodItem.dto';
 
 interface ProductSelectorModalProps {
     isOpen: boolean;
     onClose: () => void;
-    products: MenuItem[];
-    onSelect: (selectedProducts: MenuItem[]) => void; 
+    products: FoodItemDto[];
+    onSelect: (selectedProducts: FoodItemDto[]) => void; 
 }
 
 export const ProductSelectorModal = ({ isOpen, onClose, products, onSelect }: ProductSelectorModalProps) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
     const activeProducts = useMemo(() => 
-        products.filter(p => p.status === 'Activo'), 
+        products.filter(p => p.isActive), 
     [products]);
 
     const filteredProducts = useMemo(() => 
-        activeProducts.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.description.toLowerCase().includes(searchTerm.toLowerCase())),
+        activeProducts.filter(p => p.dishName.toLowerCase().includes(searchTerm.toLowerCase()) || p.description.toLowerCase().includes(searchTerm.toLowerCase())),
     [activeProducts, searchTerm]);
 
-    const handleToggle = (id: string | number) => {
+    const handleToggle = (id: number) => {
         const newSelected = new Set(selectedIds);
         if (newSelected.has(id)) {
             newSelected.delete(id);
@@ -32,10 +32,10 @@ export const ProductSelectorModal = ({ isOpen, onClose, products, onSelect }: Pr
     };
 
     const handleConfirm = () => {
-        const selected = activeProducts.filter(p => p.id !== undefined && selectedIds.has(p.id));
+        const selected = activeProducts.filter(p => selectedIds.has(p.dishId));
         onSelect(selected);
         onClose();
-        setSelectedIds(new Set()); // Reset after confirm? Or keep? Reset feels safer for repeat usage.
+        setSelectedIds(new Set()); 
         setSearchTerm('');
     };
 
@@ -64,21 +64,21 @@ export const ProductSelectorModal = ({ isOpen, onClose, products, onSelect }: Pr
                     {filteredProducts.length > 0 ? (
                         <div className="list-group list-group-flush">
                             {filteredProducts.map(product => (
-                                <label key={product.id} className={`list-group-item list-group-item-action p-3 d-flex align-items-center gap-3 cursor-pointer ${selectedIds.has(product.id!) ? 'bg-primary-subtle' : ''}`}>
+                                <label key={product.dishId} className={`list-group-item list-group-item-action p-3 d-flex align-items-center gap-3 cursor-pointer ${selectedIds.has(product.dishId) ? 'bg-primary-subtle' : ''}`}>
                                     <input 
                                         type="checkbox" 
                                         className="form-check-input flex-shrink-0" 
                                         style={{width: '1.5em', height: '1.5em'}}
-                                        checked={selectedIds.has(product.id!)}
-                                        onChange={() => handleToggle(product.id!)}
+                                        checked={selectedIds.has(product.dishId)}
+                                        onChange={() => handleToggle(product.dishId)}
                                     />
                                     <div className="d-flex align-items-center gap-3 flex-grow-1">
-                                        {product.image && (
-                                            <img src={product.image} alt="" className="rounded-3 object-fit-cover" style={{width: '50px', height: '50px'}} />
+                                        {product.imageUrl && (
+                                            <img src={product.imageUrl} alt="" className="rounded-3 object-fit-cover" style={{width: '50px', height: '50px'}} />
                                         )}
                                         <div>
                                             <div className="d-flex justify-content-between align-items-center w-100">
-                                                <h6 className="mb-0 fw-bold">{product.name}</h6>
+                                                <h6 className="mb-0 fw-bold">{product.dishName}</h6>
                                                 <span className="badge bg-light text-dark border">${product.price}</span>
                                             </div>
                                             <small className="text-secondary line-clamp-1">{product.description}</small>
@@ -111,3 +111,4 @@ export const ProductSelectorModal = ({ isOpen, onClose, products, onSelect }: Pr
         </div>
     );
 };
+

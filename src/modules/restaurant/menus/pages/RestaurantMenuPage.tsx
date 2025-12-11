@@ -9,6 +9,8 @@ import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/F
 import type { ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
 import { LoadingSpinner } from '../../../../shared/ui/LoadingSpinner/LoadingSpinner';
 
+
+
 const RestaurantMenuPage = () => {
   const [activeSection, setActiveSection] = useState<'menu' | 'library'>('menu');
   const [items, setItems] = useState<FoodItemDto[]>([]);
@@ -25,21 +27,13 @@ const RestaurantMenuPage = () => {
   const [itemToEdit, setItemToEdit] = useState<FoodItemDto | undefined>(undefined);
 
   // Use custom hook
-  const { getInitialData, registerDish } = useMenu();
+  const { getInitialData, registerDish, updateDish } = useMenu();
   
   const RESTAURANT_ID = 1;
 
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
-        // We can rely on hook's internal loading/error or keep local one if we want more control.
-        // For migration simplicity, I'll update local stat based on hook call + hook doesn't auto-fetch, so we call it.
-        // However, the hook exposes loading/error but they are updated during calls.
-        // Let's use local loading for the initial fetch to coordinate with the component's existing logic,
-        // or simplify and use the hook's returned values. 
-        // Existing logic used 'loading' state for full page spinner.
-        // Hook sets loading=true on call start. 
-        
         setLoading(true); // Keep local loading for now to ensure Spinner shows immediately
         try {
             const response = await getInitialData(RESTAURANT_ID); 
@@ -74,9 +68,6 @@ const RestaurantMenuPage = () => {
     return () => {
         isMounted = false;
     };
-    return () => {
-        isMounted = false;
-    };
   }, []); // Remove menuService dependency as getInitialData is stable from hook (or should be)
 
   // Calculate product counts dynamically for validation
@@ -104,33 +95,42 @@ const RestaurantMenuPage = () => {
   const handleSave = async (item: FoodItemDto, imageFile?: File) => {
       setLoading(true);
       try {
-        // Map FoodItemDto to RegisterDishDto
-        // Note: For editing, we might need a different DTO or method, but assuming RegisterDish works for now or dealing with CREATE only as per prompt context ("registrar platillo")
-        // If 'item.dishId' exists, it's an edit, but specific requirement focused on "registrar" (register/create).
-        // However, the modal handles both. For now, I'll implement Register (Create).
+        let response;
         
-        const registerDto: import('../../../../core/application/dtos/restaurant/RegisterDish.dto').RegisterDishDto = {
-            restaurantId: RESTAURANT_ID,
-            name: item.dishName,
-            categoryId: item.categoryId || (categories.find(c => c.name === item.categoryName)?.id || 0), // Try to find ID from name if missing
-            description: item.description,
-            price: item.price,
-            preparationTime: item.preparationTime,
-            isActive: item.isActive,
-            stock: item.isStockManaged ? item.stock : null,
-            extraIds: item.extras ? item.extras.map(e => e.id) : [],
-            image: imageFile || null
-        };
-
-        // Note: If we need to support EDIT, we would need an UpdateDish endpoint/method.
-        // Assuming current scope is "Register Dish" (Create), or if Register handles upsert?
-        // Service says "registerDish". Adapter says "RegisterDish". 
-        // I will assume this is for NEW items or the user accepts Create logic.
-        // If itemToEdit exists, we might normally call 'updateDish', but I'll stick to 'registerDish' for the requested scope 
-        // and perhaps log a warning or standard if they try to edit (or if Register handles it).
-        // User request specifically said "registrar platillo" (register dish).
-        
-        const response = await registerDish(registerDto);
+        if (item.dishId && item.dishId !== 0) {
+            // EDITAR
+            // Note: We cannot download the existing image URL due to CORS restrictions on the storage server.
+            // Sending 'null' implies "no change" to the backend.
+            
+            const updateDto: import('../../../../core/application/dtos/restaurant/UpdateDish.dto').UpdateDishDto = {
+                dishId: item.dishId,
+                name: item.dishName,
+                categoryId: item.categoryId || (categories.find(c => c.name === item.categoryName)?.id || 0),
+                description: item.description,
+                price: item.price,
+                preparationTime: item.preparationTime,
+                isActive: item.isActive,
+                stock: item.isStockManaged ? item.stock : 0, 
+                extraIds: item.extras ? item.extras.map(e => e.id) : [],
+                image: imageFile || null
+            };
+            response = await updateDish(updateDto);
+        } else {
+            // CREAR
+            const registerDto: import('../../../../core/application/dtos/restaurant/RegisterDish.dto').RegisterDishDto = {
+                restaurantId: RESTAURANT_ID,
+                name: item.dishName,
+                categoryId: item.categoryId || (categories.find(c => c.name === item.categoryName)?.id || 0), // Try to find ID from name if missing
+                description: item.description,
+                price: item.price,
+                preparationTime: item.preparationTime,
+                isActive: item.isActive,
+                stock: item.isStockManaged ? item.stock : null,
+                extraIds: item.extras ? item.extras.map(e => e.id) : [],
+                image: imageFile || null
+            };
+            response = await registerDish(registerDto);
+        }
         
         if (response.success) {
              // Refresh data

@@ -4,6 +4,7 @@ import { MenuAdapter } from '../../../../core/infrastructure/adapters/restaurant
 import type { RegisterDishDto } from '../../../../core/application/dtos/restaurant/RegisterDish.dto';
 import type { Response } from '../../../../shared/types/api';
 import type { MenuViewModel } from '../../../../core/application/viewmodels/menu.view-model';
+import type { UpdateDishDto } from '../../../../core/application/dtos/restaurant/UpdateDish.dto';
 
 export const useMenu = () => {
     const [loading, setLoading] = useState(false);
@@ -42,9 +43,25 @@ export const useMenu = () => {
         }
     };
 
+    const updateDish = async (dish: UpdateDishDto): Promise<Response<boolean>> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await menuService.updateDish(dish);
+            return response;
+        } catch (err) {
+            console.error(err);
+            setError("Error al actualizar el plato.");
+            return { success: false, message: "Error al actualizar el plato" } as Response<boolean>;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         getInitialData,
         registerDish,
+        updateDish,
         loading,
         error
     };

@@ -3,6 +3,7 @@ import { GetInitialDataUseCase } from "../../use-cases/resturant/menu/GetInitial
 import type { MenuViewModel } from "../../viewmodels/menu.view-model";
 import type { Response } from "../../../../shared/types/api";
 import type { RegisterDishDto } from "../../dtos/restaurant/RegisterDish.dto";
+import type { UpdateDishDto } from "../../dtos/restaurant/UpdateDish.dto";
 
 export class MenuService {
     
@@ -23,6 +24,11 @@ export class MenuService {
 
     async registerDish(dish: RegisterDishDto): Promise<Response<boolean>> {
         const response = await this.menuGateway.registerDish(dish);
+        return response;
+    }
+
+    async updateDish(dish: UpdateDishDto): Promise<Response<boolean>> {
+        const response = await this.menuGateway.updateDish(dish);
         return response;
     }
 }   

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import '../styles/MenuItemModal.css';
 import { AlertDialog, type AlertType } from '../../../shared/components/AlertDialog';
 import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/FoodItem.dto';
@@ -22,6 +22,7 @@ export const MenuItemModal = ({
     existingItems = [],
     availableGroups = [], availableModifierItems = []
 }: MenuItemModalProps) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState<FoodItemDto>({
         dishId: 0,
         dishName: '',
@@ -36,6 +37,8 @@ export const MenuItemModal = ({
         isStockManaged: false,
         stock: 0
     });
+
+
 
     const [categories, setCategories] = useState<GenericItemName[]>(availableCategories);
     const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -308,6 +311,7 @@ export const MenuItemModal = ({
                                             className="form-control-custom" 
                                             accept="image/*"
                                             onChange={handleImageChange} 
+                                            ref={fileInputRef}
                                             required={!initialItem && !selectedFile} // Required only on create if no file selected
                                         />
                                         <small className="text-muted mt-1 d-block">Sube una imagen atractiva (JPG, PNG)</small>
@@ -321,7 +325,9 @@ export const MenuItemModal = ({
                                                 onClick={() => {
                                                     setSelectedFile(null);
                                                     setPreviewUrl(initialItem?.imageUrl || null);
-                                                    // Reset file input value if possible, via ref (omitted for brevity)
+                                                    if (fileInputRef.current) {
+                                                        fileInputRef.current.value = '';
+                                                    }
                                                 }}
                                             >
                                                 <i className="bi bi-x"></i>
