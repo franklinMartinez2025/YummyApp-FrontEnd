@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import '../styles/MenuItemModal.css'; // Re-use styles
-import type { MenuItem } from './MenuItemModal';
+import type { MenuItem } from '../../MenuItemModal';
 
 interface ProductSelectorModalProps {
     isOpen: boolean;
     onClose: () => void;
     products: MenuItem[];
-    onSelect: (selectedProducts: MenuItem[]) => void;
+    onSelect: (selectedProducts: MenuItem[]) => void; 
 }
 
 export const ProductSelectorModal = ({ isOpen, onClose, products, onSelect }: ProductSelectorModalProps) => {

@@ -8,9 +8,9 @@ import type {ModifierGroupsTemplateDto } from '../../../../core/application/dtos
 interface MenuItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: FoodItemDto) => void;
+  onSave: (item: FoodItemDto, imageFile?: File) => void;
   initialItem?: FoodItemDto;
-  availableCategories?: string[];
+  availableCategories?: GenericItemName[];
   existingItems?: FoodItemDto[];
   availableGroups?: ModifierGroupsTemplateDto[];
   availableModifierItems?: GenericItemName[];
@@ -37,16 +37,35 @@ export const MenuItemModal = ({
         stock: 0
     });
 
-    const [categories, setCategories] = useState(availableCategories);
+    const [categories, setCategories] = useState<GenericItemName[]>(availableCategories);
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [activeTab, setActiveTab] = useState<'info' | 'extras'>('info');
     const [isVisible, setIsVisible] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Alert State
     const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, type: AlertType}>({
         isOpen: false, title: '', message: '', type: 'info'
     });
+
+    // Image Upload State
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Init preview from existing URL if no new file selected
+        if (!selectedFile) {
+            setPreviewUrl(formData.imageUrl || null);
+        }
+        // Cleanup function for object URLs is handled in handleImageChange/cleanup
+    }, [formData.imageUrl, selectedFile]);
+
+    useEffect(() => {
+        // Reset file state when modal opens/closes or item changes
+        if(isOpen) {
+             setSelectedFile(null);
+             setPreviewUrl(initialItem?.imageUrl || null);
+        }
+    }, [isOpen, initialItem]);
 
     // Handle animations
     useEffect(() => {
@@ -98,6 +117,30 @@ export const MenuItemModal = ({
         if (name === 'name') setError(null);
     };
 
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedId = parseInt(e.target.value);
+        const selectedCategory = categories.find(c => c.id === selectedId);
+        if (selectedCategory) {
+            setFormData(prev => ({
+                ...prev,
+                categoryId: selectedCategory.id,
+                categoryName: selectedCategory.name
+            }));
+        }
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            const objectUrl = URL.createObjectURL(file);
+            setPreviewUrl(objectUrl);
+            
+            // Cleanup previous object URL if needed, but for simplicity relying on component unmount or new selection replacement
+            // Ideally we track the previous previewUrl and revoke it if it was a blob
+        }
+    };
+
     const linkGroup = (libraryGroup: ModifierGroupsTemplateDto) => {
         // Convert Library Group to Product Extra Group
         const newGroup: ModifierGroupsTemplateDto = {
@@ -142,7 +185,7 @@ export const MenuItemModal = ({
             return;
         }
 
-        onSave(formData);
+        onSave(formData, selectedFile || undefined);
     };
 
     const closeAlert = () => setAlertConfig(prev => ({ ...prev, isOpen: false }));
@@ -192,21 +235,22 @@ export const MenuItemModal = ({
                                         <label className="form-label-custom">Nombre</label>
                                         <input type="text" className="form-control-custom" name="dishName" value={formData.dishName} onChange={handleChange} required placeholder="Ej. Lomo Saltado" />
                                     </div>
-                                    <div className="col-md-6">
-                                        <div className="input-group-custom">
-                                            <label className="form-label-custom">Categoría</label>
-                                            <div className="d-flex gap-2">
-                                                {isAddingCategory ? (
-                                                    <input type="text" className="form-control-custom animate-fade-in" name="category" value={formData.categoryName} onChange={handleChange} placeholder="Nueva..." autoFocus />
-                                                ) : (
-                                                    <select className="form-control-custom" name="category" value={formData.categoryName} onChange={handleChange}>
-                                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                                    </select>
-                                                )}
-                                                <button type="button" className={`btn ${isAddingCategory ? 'btn-danger' : 'btn-outline-primary'} rounded-3 px-3`} onClick={() => setIsAddingCategory(!isAddingCategory)}>
-                                                    <i className={`bi ${isAddingCategory ? 'bi-x-lg' : 'bi-plus-lg'}`}></i>
-                                                </button>
-                                            </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="input-group-custom">
+                                        <label className="form-label-custom">Categoría</label>
+                                        <div className="d-flex gap-2">
+                                            {isAddingCategory ? (
+                                                <input type="text" className="form-control-custom animate-fade-in" name="categoryName" value={formData.categoryName} onChange={handleChange} placeholder="Nueva..." autoFocus />
+                                            ) : (
+                                                <select className="form-control-custom" name="categoryId" value={formData.categoryId} onChange={handleCategoryChange} required>
+                                                    <option value={0} disabled>Seleccionar...</option>
+                                                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                                </select>
+                                            )}
+                                            <button type="button" className={`btn ${isAddingCategory ? 'btn-danger' : 'btn-outline-primary'} rounded-3 px-3`} onClick={() => setIsAddingCategory(!isAddingCategory)}>
+                                                <i className={`bi ${isAddingCategory ? 'bi-x-lg' : 'bi-plus-lg'}`}></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -258,12 +302,30 @@ export const MenuItemModal = ({
                                 { /* Image */ }
                                 <div className="col-12">
                                     <div className="input-group-custom">
-                                        <label className="form-label-custom">URL Imagen</label>
-                                        <input type="url" className="form-control-custom" name="imageUrl" value={formData.imageUrl??''} onChange={handleChange} required placeholder="https://..." />
+                                        <label className="form-label-custom">Imagen del Platillo</label>
+                                        <input 
+                                            type="file" 
+                                            className="form-control-custom" 
+                                            accept="image/*"
+                                            onChange={handleImageChange} 
+                                            required={!initialItem && !selectedFile} // Required only on create if no file selected
+                                        />
+                                        <small className="text-muted mt-1 d-block">Sube una imagen atractiva (JPG, PNG)</small>
                                     </div>
-                                    {formData.imageUrl && (
-                                        <div className="mt-2 rounded-3 overflow-hidden shadow-sm" style={{height: '100px', width: 'fit-content'}}>
-                                            <img src={formData.imageUrl} alt="Preview" style={{height: '100%', objectFit: 'cover'}} />
+                                    {previewUrl && (
+                                        <div className="mt-2 rounded-3 overflow-hidden shadow-sm position-relative group-preview-image" style={{height: '150px', width: '200px', border: '2px dashed #ddd'}}>
+                                            <img src={previewUrl} alt="Preview" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                                            <button 
+                                                type="button" 
+                                                className="position-absolute top-0 end-0 btn btn-sm btn-danger m-1 rounded-circle"
+                                                onClick={() => {
+                                                    setSelectedFile(null);
+                                                    setPreviewUrl(initialItem?.imageUrl || null);
+                                                    // Reset file input value if possible, via ref (omitted for brevity)
+                                                }}
+                                            >
+                                                <i className="bi bi-x"></i>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
