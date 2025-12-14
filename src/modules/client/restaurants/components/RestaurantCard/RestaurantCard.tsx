@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import type { RestaurantDto } from '../../../../core/application/dtos/restaurant/RestaurantDto';
+import type { GetAvailableRestaurantDto } from '../../../../../core/application/dtos/restaurant/GetAvailableRestaurant.dto';
 import './RestaurantCard.css';
 
 interface RestaurantCardProps {
-    restaurant: RestaurantDto;
+    restaurant: GetAvailableRestaurantDto;
 }
 
 export const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
-    const { id, name, image, rating, deliveryTime, deliveryFee, cuisine } = restaurant;
+    const { id, name, image, rating, deliveryTime, deliveryFee, description } = restaurant;
     const navigate = useNavigate();
 
     return (
@@ -41,7 +41,7 @@ export const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
                 </div>
 
                 <p className="card-text text-muted small mb-3 text-truncate">
-                    {cuisine.join(' • ')}
+                    {description}
                 </p>
 
                 <div className="d-flex align-items-center text-muted small border-top pt-3">

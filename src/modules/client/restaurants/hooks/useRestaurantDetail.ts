@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import type { RestaurantDto } from "../../../../core/application/dtos/restaurant/RestaurantDto";
+import type { GetAvailableRestaurantDto } from "../../../../core/application/dtos/restaurant/GetAvailableRestaurant.dto";
 import type { MenuCategoryDto } from "../../../../core/application/dtos/restaurant/MenuCategoryDto";
-import type { LoadingState } from "../../../../shared/types/api";
+import type { LoadingState } from "./useRestaurants";
 
 // Mock data for menu
 const MOCK_MENU: MenuCategoryDto[] = [
@@ -75,8 +75,8 @@ const MOCK_MENU: MenuCategoryDto[] = [
   },
 ];
 
-// Mock data for restaurant details (reusing some from useRestaurants)
-const MOCK_RESTAURANT_DETAILS: Record<string, RestaurantDto> = {
+// Mock data for restaurant details
+const MOCK_RESTAURANT_DETAILS: Record<string, GetAvailableRestaurantDto> = {
   "1": {
     id: "1",
     name: "Burger King",
@@ -87,12 +87,7 @@ const MOCK_RESTAURANT_DETAILS: Record<string, RestaurantDto> = {
     deliveryTime: "25-35",
     deliveryFee: 2.5,
     minimumOrder: 10,
-    cuisine: ["Hamburguesas", "Americana", "Fast Food"],
-    isOpen: true,
-    location: {
-      address: "Av. Principal 123",
-      coordinates: { lat: 0, lng: 0 },
-    },
+    isOpen: true
   },
   // Fallback for other IDs
   default: {
@@ -105,17 +100,12 @@ const MOCK_RESTAURANT_DETAILS: Record<string, RestaurantDto> = {
     deliveryTime: "30-45",
     deliveryFee: 2.0,
     minimumOrder: 15,
-    cuisine: ["Variada"],
-    isOpen: true,
-    location: {
-      address: "Calle Demo 123",
-      coordinates: { lat: 0, lng: 0 },
-    },
+    isOpen: true
   },
 };
 
 export const useRestaurantDetail = (restaurantId: string | undefined) => {
-  const [restaurant, setRestaurant] = useState<RestaurantDto | null>(null);
+  const [restaurant, setRestaurant] = useState<GetAvailableRestaurantDto | null>(null);
   const [menu, setMenu] = useState<MenuCategoryDto[]>([]);
   const [loadingState, setLoadingState] = useState<LoadingState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -135,8 +125,6 @@ export const useRestaurantDetail = (restaurantId: string | undefined) => {
         MOCK_RESTAURANT_DETAILS[restaurantId] ||
         MOCK_RESTAURANT_DETAILS["default"];
 
-      // In a real app, we would fetch the specific menu for this restaurant
-      // For now, we return the same mock menu for all
       setRestaurant(restaurantData);
       setMenu(MOCK_MENU);
       setLoadingState("success");
