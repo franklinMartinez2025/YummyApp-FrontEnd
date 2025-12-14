@@ -1,55 +1,112 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { GenericItemName } from '../../../../shared/types/common';
 import type { ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
-
-
+import { useMenu } from '../hooks/useMenu';
 
 interface ExtrasLibraryProps {
     items: GenericItemName[];
     setItems: React.Dispatch<React.SetStateAction<GenericItemName[]>>;
+    inactiveItems: GenericItemName[];
+    setInactiveItems: React.Dispatch<React.SetStateAction<GenericItemName[]>>;
     groups: ModifierGroupsTemplateDto[];
     setGroups: React.Dispatch<React.SetStateAction<ModifierGroupsTemplateDto[]>>;
+    onRefresh: () => void;
 }
 
-export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibraryProps) => {
+export const ExtrasLibrary = ({ items, setItems, inactiveItems, setInactiveItems, groups, setGroups, onRefresh }: ExtrasLibraryProps) => {
     const [activeTab, setActiveTab] = useState<'items' | 'groups'>('items');
-    
-    // Quick Add Item State
     const [newItemName, setNewItemName] = useState('');
-
-    // Group Editor State
     const [editingGroup, setEditingGroup] = useState<ModifierGroupsTemplateDto | null>(null);
+    const { createComponent, desactivateComponent, activateComponent, createGroup } = useMenu();
+    const RESTAURANT_ID = 1;
 
-    // -- Item Handlers --
-    const handleAddItem = (e: React.FormEvent) => {
+    const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newItemName.trim()) return;
-        setItems(prev => [...prev, { id: Math.floor(Math.random() * 1000000), name: newItemName.trim() }]);
-        setNewItemName('');
+
+        const response = await createComponent({
+            restaurantId: RESTAURANT_ID,
+            name: newItemName.trim()
+        });
+        if (response.success) {
+            setNewItemName('');
+            alert('Componente creado exitosamente.');
+            onRefresh();
+        }
     };
 
-    const handleDeleteItem = (id: number) => {
-        // Warning: In specific implementations, check if used in groups first
-        setItems(prev => prev.filter(i => i.id !== id));
+    const handleDeleteItem = async (id: number) => {
+        if (!window.confirm('¿Seguro de desactivar este componente? Pasará a la lista de Inactivos.')) return;
+        
+        const response = await desactivateComponent({
+             restaurantId: RESTAURANT_ID,
+             componentId: id
+        });
+
+        if (response.success) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                setItems(prev => prev.filter(i => i.id !== id));
+                setInactiveItems(prev => [...prev, item]);
+            }
+        }
     };
 
-    // -- Group Handlers --
+    const handleActivateItem = async (id: number) => {
+        const response = await activateComponent({
+             restaurantId: RESTAURANT_ID,
+             componentId: id
+        });
+
+        if (response.success) {
+            const item = inactiveItems.find(i => i.id === id);
+            if (item) {
+                setInactiveItems(prev => prev.filter(i => i.id !== id));
+                setItems(prev => [...prev, item]);
+            }
+        }
+    };
+
     const handleCreateGroup = () => {
         const newGroup: ModifierGroupsTemplateDto = {
-            id: Math.floor(Math.random() * 1000000),
-            name: 'Nuevo Grupo',
+            id: Date.now(),
+            name: '',
             minSelection: 1,
             maxSelection: 1,
-            options: []
+            options: [] // This will be visually populated, then mapped to DTO on save
         };
-        setGroups(prev => [...prev, newGroup]);
         setEditingGroup(newGroup);
     };
 
-    const handleSaveGroup = () => {
-        if (editingGroup) {
+    const handleSaveGroup = async () => {
+        if (!editingGroup) return;
+
+        const exists = groups.some(g => g.id === editingGroup.id);
+        
+        if (exists) {
+            // Edit existing (keep local update for now as no endpoint specified for update)
             setGroups(prev => prev.map(g => g.id === editingGroup.id ? editingGroup : g));
             setEditingGroup(null);
+        } else {
+            // Create New Group via API
+            const dto = {
+                restaurantId: RESTAURANT_ID,
+                name: editingGroup.name,
+                minSelect: editingGroup.minSelection,
+                maxSelect: editingGroup.maxSelection,
+                options: editingGroup.options.map(opt => ({
+                    itemId: opt.itemId,
+                    priceDelta: opt.price
+                }))
+            };
+
+            const response = await createGroup(dto);
+
+            if (response.success) {
+                alert('Grupo creado exitosamente');
+                setEditingGroup(null);
+                onRefresh();
+            }
         }
     };
 
@@ -96,7 +153,7 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                             <div className="card-body bg-light rounded-3">
                                 <h6 className="fw-bold mb-3"><i className="bi bi-plus-circle me-2"></i>Crear Componente</h6>
                                 <p className="small text-muted mb-3">
-                                    Agrega items sueltos como "Sopa", "Arroz", "Papas". Luego los agruparás.
+                                    Agrega items sueltos como "Sopa", "Arroz", "Papas".
                                 </p>
                                 <form onSubmit={handleAddItem}>
                                     <div className="input-group mb-2">
@@ -120,24 +177,44 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                     <div className="col-md-8">
                         <div className="card border-0 shadow-sm h-100">
                             <div className="card-header bg-white py-3">
-                                <h6 className="mb-0 fw-bold">Mis Componentes ({items.length})</h6>
+                                <h6 className="mb-0 fw-bold">Gestionar Componentes</h6>
                             </div>
                             <div className="card-body p-0">
-                                <div className="list-group list-group-flush">
-                                    {items.length === 0 && (
-                                        <div className="text-center py-5 text-muted">
-                                            <i className="bi bi-basket fs-1 mb-2 d-block opacity-25"></i>
-                                            Sin componentes creados
-                                        </div>
-                                    )}
+                                {/* ACTIVE COMPONENTS */}
+                                <div className="p-3 bg-light border-bottom">
+                                    <h6 className="text-secondary text-uppercase fs-xs fw-bold mb-0">Activos ({items.length})</h6>
+                                </div>
+                                <div className="list-group list-group-flush mb-4">
+                                    {items.length === 0 && <div className="p-4 text-center text-muted small">No hay componentes activos</div>}
                                     {items.map(item => (
                                         <div key={item.id} className="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
-                                            <span className="fw-medium">{item.name}</span>
+                                            <span className="fw-medium text-dark">{item.name}</span>
                                             <button 
                                                 className="btn btn-sm btn-outline-danger border-0 opacity-50 hover-opacity-100"
+                                                title="Desactivar"
                                                 onClick={() => handleDeleteItem(item.id)}
                                             >
                                                 <i className="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* INACTIVE COMPONENTS */}
+                                <div className="p-3 bg-light border-bottom border-top">
+                                    <h6 className="text-secondary text-uppercase fs-xs fw-bold mb-0">Inactivos ({inactiveItems.length})</h6>
+                                </div>
+                                <div className="list-group list-group-flush">
+                                    {inactiveItems.length === 0 && <div className="p-4 text-center text-muted small">No hay componentes inactivos</div>}
+                                    {inactiveItems.map(item => (
+                                        <div key={item.id} className="list-group-item d-flex justify-content-between align-items-center px-4 py-3 bg-light-subtle text-muted">
+                                            <span className="fw-medium text-decoration-line-through">{item.name}</span>
+                                            <button 
+                                                className="btn btn-sm btn-outline-success border-0 opacity-75 hover-opacity-100"
+                                                title="Reactivar"
+                                                onClick={() => handleActivateItem(item.id)}
+                                            >
+                                                <i className="bi bi-arrow-counterclockwise me-1"></i>Activar
                                             </button>
                                         </div>
                                     ))}
@@ -190,8 +267,7 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                                     </div>
                                 </div>
                             ))}
-                        </>
-                    ) : (
+                        </>) : (
                         // EDITING MODE
                         <div className="col-12">
                             <div className="card shadow border-0">
@@ -200,10 +276,12 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                                         <button className="btn btn-light rounded-circle" onClick={() => setEditingGroup(null)}>
                                             <i className="bi bi-arrow-left"></i>
                                         </button>
-                                        <h5 className="mb-0 fw-bold">Editando Grupo</h5>
+                                        <h5 className="mb-0 fw-bold">
+                                            {editingGroup && groups.some(g => g.id === editingGroup.id) ? 'Editando Grupo' : 'Creando Grupo'}
+                                        </h5>
                                     </div>
                                     <button className="btn btn-success px-4" onClick={handleSaveGroup}>
-                                        Guardar Grupo
+                                        {editingGroup && groups.some(g => g.id === editingGroup.id) ? 'Guardar Cambios' : 'Crear Grupo'}
                                     </button>
                                 </div>
                                 <div className="card-body p-4">
@@ -215,8 +293,8 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                                                 <label className="form-label small fw-bold">Nombre del Grupo</label>
                                                 <input 
                                                     type="text" className="form-control" 
-                                                    value={editingGroup.name} 
-                                                    onChange={e => setEditingGroup({...editingGroup, name: e.target.value})}
+                                                    value={editingGroup!.name} 
+                                                    onChange={e => editingGroup && setEditingGroup({...editingGroup, name: e.target.value})}
                                                     placeholder="Ej. Entradas del Día"
                                                 />
                                             </div>
@@ -225,16 +303,16 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                                                     <label className="form-label small fw-bold">Mínimo</label>
                                                     <input 
                                                         type="number" className="form-control" 
-                                                        value={editingGroup.minSelection} 
-                                                        onChange={e => setEditingGroup({...editingGroup, minSelection: parseInt(e.target.value) || 0})}
+                                                        value={editingGroup!.minSelection} 
+                                                        onChange={e => editingGroup && setEditingGroup({...editingGroup, minSelection: parseInt(e.target.value) || 0})}
                                                     />
                                                 </div>
                                                 <div className="col-6">
                                                     <label className="form-label small fw-bold">Máximo</label>
                                                     <input 
                                                         type="number" className="form-control" 
-                                                        value={editingGroup.maxSelection} 
-                                                        onChange={e => setEditingGroup({...editingGroup, maxSelection: parseInt(e.target.value) || 0})}
+                                                        value={editingGroup!.maxSelection} 
+                                                        onChange={e => editingGroup && setEditingGroup({...editingGroup, maxSelection: parseInt(e.target.value) || 0})}
                                                     />
                                                 </div>
                                             </div>
@@ -278,14 +356,14 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {editingGroup.options.length === 0 && (
+                                                        {editingGroup!.options.length === 0 && (
                                                             <tr>
                                                                 <td colSpan={3} className="text-center py-4 text-muted">
                                                                     Agrega componentes usando el botón de arriba.
                                                                 </td>
                                                             </tr>
                                                         )}
-                                                        {editingGroup.options.map((opt, idx) => {
+                                                        {editingGroup!.options.map((opt, idx) => {
                                                             const itemDef = items.find(i => i.id === opt.itemId);
                                                             return (
                                                                 <tr key={opt.id} className="border-top">
@@ -299,18 +377,22 @@ export const ExtrasLibrary = ({ items, setItems, groups, setGroups }: ExtrasLibr
                                                                                 style={{maxWidth: '60px'}}
                                                                                 value={opt.price} 
                                                                                 onChange={(e) => {
-                                                                                    const newOptions = [...editingGroup.options];
-                                                                                    newOptions[idx].price = parseFloat(e.target.value) || 0;
-                                                                                    setEditingGroup({...editingGroup, options: newOptions});
+                                                                                    if (editingGroup) {
+                                                                                        const newOptions = [...editingGroup.options];
+                                                                                        newOptions[idx].price = parseFloat(e.target.value) || 0;
+                                                                                        setEditingGroup({...editingGroup, options: newOptions});
+                                                                                    }
                                                                                 }}
                                                                             />
                                                                          </div>
                                                                     </td>
                                                                     <td>
                                                                         <button className="btn btn-link text-danger p-0" onClick={() => {
-                                                                            const newOptions = [...editingGroup.options];
-                                                                            newOptions.splice(idx, 1);
-                                                                            setEditingGroup({...editingGroup, options: newOptions});
+                                                                            if (editingGroup) {
+                                                                                const newOptions = [...editingGroup.options];
+                                                                                newOptions.splice(idx, 1);
+                                                                                setEditingGroup({...editingGroup, options: newOptions});
+                                                                            }
                                                                         }}>
                                                                             <i className="bi bi-x-lg"></i>
                                                                         </button>

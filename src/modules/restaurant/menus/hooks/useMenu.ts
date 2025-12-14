@@ -5,6 +5,10 @@ import type { RegisterDishDto } from '../../../../core/application/dtos/restaura
 import type { Response } from '../../../../shared/types/api';
 import type { MenuViewModel } from '../../../../core/application/viewmodels/menu.view-model';
 import type { UpdateDishDto } from '../../../../core/application/dtos/restaurant/UpdateDish.dto';
+import type { CreateComponentDto } from '../../../../core/application/dtos/restaurant/CreateComponent.dto';
+import type { DesactivateComponentDto } from '../../../../core/application/dtos/restaurant/DesactivateComponent.dto';
+import type { ActivateComponentDto } from '../../../../core/application/dtos/restaurant/ActivateComponent.dto';
+import type { CreateGroupDto } from '../../../../core/application/dtos/restaurant/CreateGroup.dto';
 
 export const useMenu = () => {
     const [loading, setLoading] = useState(false);
@@ -58,10 +62,74 @@ export const useMenu = () => {
         }
     };
 
+    const createComponent = async (component: CreateComponentDto): Promise<Response<boolean>> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await menuService.createComponent(component);
+            return response;
+        } catch (err) {
+            console.error(err);
+            setError("Error al crear el componente.");
+            return { success: false, message: "Error al crear el componente" } as Response<boolean>;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const desactivateComponent = async (componentId: DesactivateComponentDto): Promise<Response<boolean>> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await menuService.desactivateComponent(componentId);
+            return response;
+        } catch (err) {
+            console.error(err);
+            setError("Error al desactivar el componente.");
+            return { success: false, message: "Error al desactivar el componente" } as Response<boolean>;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const activateComponent = async (componentId: ActivateComponentDto): Promise<Response<boolean>> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await menuService.activateComponent(componentId);
+            return response;
+        } catch (err) {
+            console.error(err);
+            setError("Error al activar el componente.");
+            return { success: false, message: "Error al activar el componente" } as Response<boolean>;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const createGroup = async (group: CreateGroupDto): Promise<Response<boolean>> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await menuService.createGroup(group);
+            return response;
+        } catch (err) {
+            console.error(err);
+            setError("Error al crear el grupo.");
+            return { success: false, message: "Error al crear el grupo" } as Response<boolean>;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         getInitialData,
         registerDish,
         updateDish,
+        createComponent,
+        desactivateComponent,
+        activateComponent,
+        createGroup,
         loading,
         error
     };

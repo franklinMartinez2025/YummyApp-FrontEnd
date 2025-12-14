@@ -19,7 +19,12 @@ export interface MenuViewModel {
     modifierGroupsTemplates: ModifierGroupsTemplateDto[];
 
     /**
-     * Lista de componentes
+     * Lista de componentes activos
      */
-    components: GenericItemName[];
+    activeComponents: GenericItemName[];
+
+    /**
+     * Lista de componentes desactivados
+     */
+    inactiveComponents: GenericItemName[];
 }

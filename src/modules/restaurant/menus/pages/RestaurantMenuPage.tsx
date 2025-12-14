@@ -16,61 +16,43 @@ const RestaurantMenuPage = () => {
   const [items, setItems] = useState<FoodItemDto[]>([]);
   const [categories, setCategories] = useState<GenericItemName[]>([]);
   const [modifierItems, setModifierItems] = useState<GenericItemName[]>([]);
+  const [inactiveModifierItems, setInactiveModifierItems] = useState<GenericItemName[]>([]);
   const [modifierGroups, setModifierGroups] = useState<ModifierGroupsTemplateDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Restore missing state variables
   const [activeCategory, setActiveCategory] = useState("Todo");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<FoodItemDto | undefined>(undefined);
-
-  // Use custom hook
   const { getInitialData, registerDish, updateDish } = useMenu();
-  
   const RESTAURANT_ID = 1;
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-        setLoading(true); // Keep local loading for now to ensure Spinner shows immediately
-        try {
-            const response = await getInitialData(RESTAURANT_ID); 
-            console.log("🔍 Respuesta cruda del servicio:", response);
-      
-            if (isMounted) {
-                if (response && response.success && response.data) {
-                    console.log('Categorías:', response.data.categories);
-                    setCategories(response.data.categories);
-                    setItems(response.data.foodItems);
-                    setModifierItems(response.data.components);
-                    setModifierGroups(response.data.modifierGroupsTemplates);
-                } else {
-                    console.warn("⚠️ La respuesta no tiene el formato esperado o success es falso:", response);
-                    setError("No se pudieron cargar los datos del menú.");
-                }
-            }
-        } catch (err) {
-            if (isMounted) {
-                console.error(err);
-                setError("Ocurrió un error al cargar el menú. Por favor intente nuevamente.");
-            }
-        } finally {
-            if (isMounted) {
-                setLoading(false);
-            }
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+        const response = await getInitialData(RESTAURANT_ID); 
+        if (response && response.success && response.data) {
+            setCategories(response.data.categories);
+            setItems(response.data.foodItems);
+            setModifierItems(response.data.activeComponents);
+            setInactiveModifierItems(response.data.inactiveComponents);
+            setModifierGroups(response.data.modifierGroupsTemplates); 
+        } else {
+            setError("No se pudieron cargar los datos del menú.");
         }
-    };
+    } catch (err) {
+        setError("Ocurrió un error al cargar el menú. Por favor intente nuevamente.");
+    } finally {
+        setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
+  }, []);
 
-    return () => {
-        isMounted = false;
-    };
-  }, []); // Remove menuService dependency as getInitialData is stable from hook (or should be)
+  // ... (keeping existing useMemo and handle functions) ...
 
-  // Calculate product counts dynamically for validation
   const categoriesWithCounts = useMemo(() => {
       return categories.map(cat => ({
           ...cat,
@@ -99,9 +81,6 @@ const RestaurantMenuPage = () => {
         
         if (item.dishId && item.dishId !== 0) {
             // EDITAR
-            // Note: We cannot download the existing image URL due to CORS restrictions on the storage server.
-            // Sending 'null' implies "no change" to the backend.
-            
             const updateDto: import('../../../../core/application/dtos/restaurant/UpdateDish.dto').UpdateDishDto = {
                 dishId: item.dishId,
                 name: item.dishName,
@@ -112,8 +91,9 @@ const RestaurantMenuPage = () => {
                 isActive: item.isActive,
                 stock: item.isStockManaged ? item.stock : 0, 
                 extraIds: item.extras ? item.extras.map(e => e.id) : [],
-                image: imageFile || null
+                image: imageFile ?? null
             };
+
             response = await updateDish(updateDto);
         } else {
             // CREAR
@@ -133,12 +113,13 @@ const RestaurantMenuPage = () => {
         }
         
         if (response.success) {
-             // Refresh data
              const refreshResponse = await getInitialData(RESTAURANT_ID);
              if (refreshResponse.success && refreshResponse.data) {
                  setItems(refreshResponse.data.foodItems);
                  setCategories(refreshResponse.data.categories);
-                 // ... other state updates if needed
+                 setModifierItems(refreshResponse.data.activeComponents);
+                 setInactiveModifierItems(refreshResponse.data.inactiveComponents);
+                 setModifierGroups(refreshResponse.data.modifierGroupsTemplates);
              }
              setIsModalOpen(false);
              setItemToEdit(undefined);
@@ -147,12 +128,12 @@ const RestaurantMenuPage = () => {
         }
 
       } catch (err) {
-          console.error("Error saving dish:", err);
           alert("Ocurrió un error al guardar el platillo.");
       } finally {
           setLoading(false);
       }
   };
+
 
   if (loading) {
       return <LoadingSpinner fullHeight message="Cargando menú..." />;
@@ -197,18 +178,23 @@ const RestaurantMenuPage = () => {
               </button>
           </div>
 
-          <button className="btn-yummy-add" onClick={handleCreate} disabled={activeSection === 'library'}>
-            <i className="bi bi-plus-lg"></i>
-            Nuevo Platillo
-          </button>
+          {activeSection === 'menu' && (
+              <button className="btn-yummy-add" onClick={handleCreate}>
+                <i className="bi bi-plus-lg"></i>
+                Nuevo Platillo
+              </button>
+          )}
         </div>
 
         {activeSection === 'library' ? (
              <ExtrasLibrary 
                 items={modifierItems} 
                 setItems={setModifierItems}
+                inactiveItems={inactiveModifierItems}
+                setInactiveItems={setInactiveModifierItems}
                 groups={modifierGroups}
                 setGroups={setModifierGroups}
+                onRefresh={fetchData}
              />
         ) : (
             <>
@@ -312,7 +298,6 @@ const RestaurantMenuPage = () => {
         initialItem={itemToEdit}
         availableCategories={categories}
         existingItems={items}
-        // Pass library data so Modal can use it
         availableGroups={modifierGroups}
         availableModifierItems={modifierItems}
       />

@@ -1,4 +1,8 @@
 import type { Response } from "../../../../shared/types/api";
+import type { ActivateComponentDto } from "../../../application/dtos/restaurant/ActivateComponent.dto";
+import type { CreateComponentDto } from "../../../application/dtos/restaurant/CreateComponent.dto";
+import type { CreateGroupDto } from "../../../application/dtos/restaurant/CreateGroup.dto";
+import type { DesactivateComponentDto } from "../../../application/dtos/restaurant/DesactivateComponent.dto";
 import type { RegisterDishDto } from "../../../application/dtos/restaurant/RegisterDish.dto";
 import type { UpdateDishDto } from "../../../application/dtos/restaurant/UpdateDish.dto";
 import type { MenuViewModel } from "../../../application/viewmodels/menu.view-model";
@@ -12,4 +16,16 @@ export interface IMenuGateway {
 
     /**Actualiza un plato*/
     updateDish(dish: UpdateDishDto): Promise<Response<boolean>>;
+
+    /**Crea un componente*/
+    createComponent(data: CreateComponentDto): Promise<Response<boolean>>;
+
+    /**Desactiva un componente*/
+    desactivateComponent(data: DesactivateComponentDto): Promise<Response<boolean>>;
+
+    /**Activa un componente*/
+    activateComponent(data: ActivateComponentDto): Promise<Response<boolean>>;
+
+    /**Crea un grupo*/
+    createGroup(data: CreateGroupDto): Promise<Response<boolean>>;
 }

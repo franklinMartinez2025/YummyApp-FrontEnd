@@ -8,5 +8,5 @@ export interface UpdateDishDto {
   isActive: boolean;
   stock?: number;
   extraIds: number[];
-  image: File | null;
+  image?: File | null;
 }

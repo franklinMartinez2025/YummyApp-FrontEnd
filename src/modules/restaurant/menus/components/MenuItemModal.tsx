@@ -49,33 +49,27 @@ export const MenuItemModal = ({
     const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, title: string, message: string, type: AlertType}>({
         isOpen: false, title: '', message: '', type: 'info'
     });
-
-    // Image Upload State
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        // Init preview from existing URL if no new file selected
         if (!selectedFile) {
             setPreviewUrl(formData.imageUrl || null);
         }
-        // Cleanup function for object URLs is handled in handleImageChange/cleanup
     }, [formData.imageUrl, selectedFile]);
 
     useEffect(() => {
-        // Reset file state when modal opens/closes or item changes
         if(isOpen) {
              setSelectedFile(null);
              setPreviewUrl(initialItem?.imageUrl || null);
         }
     }, [isOpen, initialItem]);
 
-    // Handle animations
     useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
             setCategories(availableCategories);
-            setError(null); // Reset error
+            setError(null);
         } else {
             const timer = setTimeout(() => setIsVisible(false), 400);
             return () => clearTimeout(timer);
@@ -103,7 +97,6 @@ export const MenuItemModal = ({
         setActiveTab('info');
     }, [initialItem, isOpen]);
 
-    // Don't unmount immediately to allow exit animation
     if (!isOpen && !isVisible) return null;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -138,14 +131,19 @@ export const MenuItemModal = ({
             setSelectedFile(file);
             const objectUrl = URL.createObjectURL(file);
             setPreviewUrl(objectUrl);
-            
-            // Cleanup previous object URL if needed, but for simplicity relying on component unmount or new selection replacement
-            // Ideally we track the previous previewUrl and revoke it if it was a blob
         }
     };
 
     const linkGroup = (libraryGroup: ModifierGroupsTemplateDto) => {
-        // Convert Library Group to Product Extra Group
+        if (formData.extras?.some(e => e.id === libraryGroup.id)) {
+            setAlertConfig({
+                isOpen: true,
+                title: 'Grupo Ya Agregado',
+                message: `El grupo "${libraryGroup.name}" ya está vinculado a este producto.`,
+                type: 'warning'
+            });
+            return;
+        }
         const newGroup: ModifierGroupsTemplateDto = {
             id: libraryGroup.id,
             name: libraryGroup.name,
@@ -369,7 +367,7 @@ export const MenuItemModal = ({
 
                                 <div className="d-flex flex-column gap-3">
                                     {formData.extras?.map((group, groupIndex) => (
-                                        <div key={group.id} className="card border shadow-sm group-card">
+                                        <div key={`${group.id}-${groupIndex}`} className="card border shadow-sm group-card">
                                             <div className="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                                                 <div className="d-flex align-items-center gap-2 flex-grow-1">
                                                     <input 
@@ -407,8 +405,8 @@ export const MenuItemModal = ({
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {group.options.map((opt) => (
-                                                                    <tr key={opt.id} className="border-bottom-custom">
+                                                            {group.options.map((opt, idx) => (
+                                                                    <tr key={`${opt.itemId}-${idx}`} className="border-bottom-custom">
                                                                     <td className="ps-3 text-dark">{opt.itemName}</td>
                                                                     <td className="text-end pe-3">
                                                                          {opt.price > 0 ? `+ $${opt.price.toFixed(2)}` : 'Gratis'}

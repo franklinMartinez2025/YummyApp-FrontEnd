@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import '../styles/MenuItemModal.css'; // Re-use styles
+import '../styles/MenuItemModal.css';
 import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/FoodItem.dto';
 
 interface ProductSelectorModalProps {

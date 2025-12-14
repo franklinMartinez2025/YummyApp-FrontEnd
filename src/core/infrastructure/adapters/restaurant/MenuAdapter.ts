@@ -5,6 +5,10 @@ import { apiClient } from "../../api/apiClient";
 import { API_SERVICES } from "../../../config/api.config";
 import type { RegisterDishDto } from "../../../application/dtos/restaurant/RegisterDish.dto";
 import type { UpdateDishDto } from "../../../application/dtos/restaurant/UpdateDish.dto";
+import type { CreateComponentDto } from "../../../application/dtos/restaurant/CreateComponent.dto";
+import type { DesactivateComponentDto } from "../../../application/dtos/restaurant/DesactivateComponent.dto";
+import type { ActivateComponentDto } from "../../../application/dtos/restaurant/ActivateComponent.dto";
+import type { CreateGroupDto } from "../../../application/dtos/restaurant/CreateGroup.dto";
 
 export class MenuAdapter implements IMenuGateway {
   async getInitialData(restaurantId: number): Promise<Response<MenuViewModel>> {
@@ -50,6 +54,22 @@ export class MenuAdapter implements IMenuGateway {
         }
       }
     });
-    return await apiClient.put<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/UpdateDish`, formData);
+    return await apiClient.patch<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/UpdateDish`, formData);
+  }
+
+  async createComponent(data: CreateComponentDto): Promise<Response<boolean>> {
+    return await apiClient.post<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/CreateComponent`, data);
+  }
+
+  async desactivateComponent(data: DesactivateComponentDto): Promise<Response<boolean>> {
+    return await apiClient.patch<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/DesactivateComponent`, data);
+  }
+
+  async activateComponent(data: ActivateComponentDto): Promise<Response<boolean>> {
+    return await apiClient.patch<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/ActivateComponent`, data);
+  }
+
+  async createGroup(data: CreateGroupDto): Promise<Response<boolean>> {
+    return await apiClient.post<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/CreateGroup`, {dto:data});
   }
 }
