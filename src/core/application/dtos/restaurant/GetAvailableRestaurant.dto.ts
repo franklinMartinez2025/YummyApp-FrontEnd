@@ -3,9 +3,8 @@ export interface GetAvailableRestaurantDto {
   name: string;
   description: string;
   image: string;
+  banner: string;
   rating: number;
   deliveryTime: string;
   deliveryFee: number;
-  minimumOrder: number;
-  isOpen: boolean;
 }

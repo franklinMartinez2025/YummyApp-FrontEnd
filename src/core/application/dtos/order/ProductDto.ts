@@ -9,6 +9,13 @@ export interface ProductDto {
   isAvailable: boolean;
   ingredients?: string[];
   nutritionalInfo?: NutritionalInfoDto;
+  customization?: {
+    name: string;
+    options: {
+      name: string;
+      price: number;
+    }[];
+  }[];
 }
 
 export interface NutritionalInfoDto {

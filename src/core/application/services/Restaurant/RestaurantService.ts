@@ -1,6 +1,7 @@
 import type { IRestaurantGateway } from "../../../domain/gateways/restaurant/IRestaurantGateway";
 import type { GetAvailableRestaurantDto } from "../../../application/dtos/restaurant/GetAvailableRestaurant.dto";
 import type { Response } from "../../../../shared/types/api";
+import type { RestaurantDetailDto } from "../../dtos/restaurant/RestaurantDetail.dto";
 
 export class RestaurantService {
     
@@ -14,7 +15,7 @@ export class RestaurantService {
         return await this.restaurantGateway.getAvailableRestaurants();
     }
 
-    async getRestaurant(id: string): Promise<Response<GetAvailableRestaurantDto>> {
-        return await this.restaurantGateway.getRestaurant(id);
+    async getRestaurantDetailsById(restaurantId:number): Promise<Response<RestaurantDetailDto>> {
+        return await this.restaurantGateway.getRestaurantDetailsById(restaurantId);
     }
 }

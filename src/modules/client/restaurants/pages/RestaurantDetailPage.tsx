@@ -35,11 +35,11 @@ export const RestaurantDetailPage = () => {
     return (
         <div className="restaurant-detail-page fade-in">
             {/* Hero Banner */}
-            <div className="restaurant-banner" style={{ backgroundImage: `url(${restaurant.image})` }}>
+            <div className="restaurant-banner" style={{ backgroundImage: `url(${restaurant.banner})` }}>
                 <div className="banner-overlay">
                     <div className="container h-100 d-flex flex-column justify-content-end pb-5">
                         <h1 className="text-white fw-bold display-4 mb-2">{restaurant.name}</h1>
-                        <p className="text-white-50 lead mb-3">{restaurant.description}</p>
+                        <p className="text-white lead mb-3">{restaurant.description}</p>
                         <div className="d-flex gap-3 text-white">
                             <div className="d-flex align-items-center bg-white text-dark px-3 py-1 rounded-pill">
                                 <i className="bi bi-star-fill text-warning me-2"></i>

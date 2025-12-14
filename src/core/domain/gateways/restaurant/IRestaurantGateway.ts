@@ -1,8 +1,10 @@
 import type { GetAvailableRestaurantDto } from "../../../application/dtos/restaurant/GetAvailableRestaurant.dto";
 import type { Response } from "../../../../shared/types/api";
+import type { RestaurantDetailDto } from "../../../application/dtos/restaurant/RestaurantDetail.dto";
 
 export interface IRestaurantGateway {
     
     getAvailableRestaurants(): Promise<Response<GetAvailableRestaurantDto[]>>;
-    getRestaurant(id: string): Promise<Response<GetAvailableRestaurantDto>>;
+
+    getRestaurantDetailsById(restaurantId:number): Promise<Response<RestaurantDetailDto>>;
 } 

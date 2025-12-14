@@ -1,3 +1,12 @@
+export interface CartItemModifierDto {
+  name: string;
+  price: number;
+  options: {
+    name: string;
+    price: number;
+  }[];
+}
+
 export interface CartItemDto {
   productId: string;
   product: {
@@ -9,6 +18,7 @@ export interface CartItemDto {
   quantity: number;
   subtotal: number;
   specialInstructions?: string;
+  selectedModifiers?: CartItemModifierDto[];
 }
 
 export interface CartDto {
@@ -28,6 +38,7 @@ export interface AddCartItemDto {
   productId: string;
   quantity: number;
   specialInstructions?: string;
+  selectedModifiers?: CartItemModifierDto[];
 }
 
 export interface UpdateCartItemDto {

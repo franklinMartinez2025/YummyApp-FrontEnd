@@ -1,9 +1,11 @@
 import type { ProductDto } from "../../../../../core/application/dtos/order/ProductDto";
+import { useState } from "react";
 import './ProductCard.css';
 
 import { useCart } from '../../../../client/cart/context/CartContext';
 import { useAuthContext } from '../../../../../shared/context/useAuthContext';
 import { useAuthModal } from '../../../../../modules/shared/auth/context/AuthModalContext';
+import { ProductCustomizationModal } from '../ProductCustomizationModal/ProductCustomizationModal';
 
 interface ProductCardProps {
     product: ProductDto;
@@ -14,48 +16,69 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     const { addItem } = useCart();
     const { isAuthenticated } = useAuthContext();
     const { openAuthModal } = useAuthModal();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleAddClick = () => {
+        if (!isAuthenticated) {
+            openAuthModal('login');
+            return;
+        }
+
+        if (product.customization && product.customization.length > 0) {
+            setIsModalOpen(true);
+        } else {
+            addItem(product);
+        }
+    };
 
     return (
-        <div className="card h-100 product-card shadow-sm border-0">
-            <div className="row g-0 h-100">
-                <div className="col-4 col-sm-12 product-image-container">
-                    <img
-                        src={image}
-                        className="img-fluid rounded-start product-img"
-                        alt={name}
-                        onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'https://placehold.co/400x300?text=Plato';
-                        }}
-                    />
-                </div>
-                <div className="col-8 col-sm-12">
-                    <div className="card-body d-flex flex-column h-100 p-3">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                            <h6 className="card-title fw-bold mb-0 text-truncate-2">{name}</h6>
-                            <span className="fw-bold text-primary ms-2">${price.toFixed(2)}</span>
-                        </div>
-
-                        <p className="card-text text-muted small mb-3 flex-grow-1 text-truncate-3">
-                            {description}
-                        </p>
-
-                        <button
-                            className="btn btn-outline-primary btn-sm w-100 mt-auto rounded-pill"
-                            onClick={() => {
-                                if (!isAuthenticated) {
-                                    openAuthModal('login');
-                                    return;
-                                }
-                                addItem(product);
+        <>
+            <div className="card h-100 product-card shadow-sm border-0">
+                <div className="row g-0 h-100">
+                    <div className="col-4 col-sm-12 product-image-container">
+                        <img
+                            src={image}
+                            className="img-fluid rounded-start product-img"
+                            alt={name}
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'https://placehold.co/400x300?text=Plato';
                             }}
-                        >
-                            <i className="bi bi-plus-lg me-1"></i>
-                            Agregar
-                        </button>
+                        />
+                    </div>
+                    <div className="col-8 col-sm-12">
+                        <div className="card-body d-flex flex-column h-100 p-3">
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                                <h6 className="card-title fw-bold mb-0 text-truncate-2">{name}</h6>
+                                <span className="fw-bold text-primary ms-2">${price.toFixed(2)}</span>
+                            </div>
+
+                            <p className="card-text text-muted small mb-3 flex-grow-1 text-truncate-3">
+                                {description}
+                            </p>
+
+                            <button
+                                className="btn btn-outline-primary btn-sm w-100 mt-auto rounded-pill"
+                                onClick={handleAddClick}
+                            >
+                                <i className="bi bi-plus-lg me-1"></i>
+                                Agregar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {isModalOpen && (
+                <ProductCustomizationModal
+                    product={product}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={(modifiers, instructions, quantity) => {
+                        addItem(product, quantity, modifiers, instructions);
+                        setIsModalOpen(false);
+                    }}
+                />
+            )}
+        </>
     );
 };
