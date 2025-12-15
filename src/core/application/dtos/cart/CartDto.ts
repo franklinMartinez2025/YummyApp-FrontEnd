@@ -1,7 +1,9 @@
 export interface CartItemModifierDto {
+  id: number;
   name: string;
   price: number;
   options: {
+    id: number;
     name: string;
     price: number;
   }[];
@@ -14,6 +16,7 @@ export interface CartItemDto {
     name: string;
     price: number;
     image: string;
+    restaurantId?: number;
   };
   quantity: number;
   subtotal: number;

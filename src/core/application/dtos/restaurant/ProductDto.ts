@@ -5,10 +5,13 @@ export interface ProductDto {
   price: number;
   image: string;
   customization?: {
+    id: number;
     name: string;
     options: {
+      id: number;
       name: string;
       price: number;
     }[];
   }[];
+  restaurantId?: number; // Added to capture restaurant context
 }

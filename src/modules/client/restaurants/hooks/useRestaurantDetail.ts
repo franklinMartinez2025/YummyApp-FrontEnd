@@ -62,12 +62,15 @@ export const useRestaurantDetail = (restaurantId: string | undefined) => {
             price: foodItem.price,
             image: foodItem.imageUrl || '',
             customization: foodItem.extras?.map(group => ({
+              id: group.id,
               name: group.name,
               options: group.options.map(opt => ({
+                id: opt.id,
                 name: opt.itemName,
                 price: opt.price
               }))
-            })) || []
+            })) || [],
+            restaurantId: detail.restaurantId // Injecting restaurantId
           });
         });
 

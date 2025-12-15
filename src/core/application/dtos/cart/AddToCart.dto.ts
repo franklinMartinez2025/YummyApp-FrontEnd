@@ -3,7 +3,9 @@ export interface AddToCartDto {
   restaurantId: number;
   dishId: number;
   dishName: string;
+  dishImage: string;
   quantity: number;
+  unitPrice: number;
   modifierGroups: AddToCartModifierGroupDto[];
 }
 

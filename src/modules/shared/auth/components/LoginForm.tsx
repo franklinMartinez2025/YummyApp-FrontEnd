@@ -45,7 +45,7 @@ export const LoginForm = ({ onSuccess, onRegisterClick }: LoginFormProps) => {
 
         if (result.success && result.user) {
             const userForContext = {
-                id: result.user.email,
+                id: result.user.userId, 
                 fullName: result.user.fullName,
                 email: result.user.email,
                 roles: result.user.roles,

@@ -5,7 +5,7 @@ import './CartDrawer.css';
 
 export const CartDrawer = () => {
     const navigate = useNavigate();
-    const { items, isOpen, closeCart, totalAmount, totalItems } = useCart();
+    const { items, isOpen, closeCart, totalAmount, totalItems, updateQuantity, removeItem } = useCart();
 
     const handleCheckout = () => {
         closeCart();
@@ -40,7 +40,17 @@ export const CartDrawer = () => {
                         </div>
                     ) : (
                         items.map((item) => (
-                            <CartItem key={item.product.id} item={item} />
+                            <CartItem 
+                                key={item.productId} 
+                                item={item}
+                                onIncrease={() => updateQuantity(item.productId, item.quantity + 1)}
+                                onDecrease={() => {
+                                    if (item.quantity > 1) {
+                                        updateQuantity(item.productId, item.quantity - 1);
+                                    }
+                                }}
+                                onRemove={() => removeItem(item.productId)}
+                            />
                         ))
                     )}
                 </div>

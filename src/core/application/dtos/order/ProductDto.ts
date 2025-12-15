@@ -10,8 +10,10 @@ export interface ProductDto {
   ingredients?: string[];
   nutritionalInfo?: NutritionalInfoDto;
   customization?: {
+    id: number; // Added for parity with Restaurant ProductDto
     name: string;
     options: {
+      id: number; // Added for parity
       name: string;
       price: number;
     }[];

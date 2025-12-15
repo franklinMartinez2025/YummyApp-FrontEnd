@@ -54,12 +54,14 @@ export const ProductCustomizationModal = ({
                  const selectedOptions = group.options
                     .filter(opt => groupSelections.includes(opt.name))
                     .map(opt => ({
+                        id: opt.id,
                         name: opt.name,
                         price: opt.price
                     }));
 
                 if (selectedOptions.length > 0) {
                     modifiers.push({
+                        id: group.id,
                         name: group.name,
                         price: 0, // Group price usually 0, options carry price
                         options: selectedOptions
