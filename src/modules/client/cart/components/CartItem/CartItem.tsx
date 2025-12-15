@@ -1,14 +1,16 @@
-import { useCart } from '../../context/CartContext';
+
 import type { CartItemDto, CartItemModifierDto } from '../../../../../core/application/dtos/cart/CartDto';
 import './CartItem.css';
 
 interface CartItemProps {
   item: CartItemDto;
+  onIncrease: () => void;
+  onDecrease: () => void;
+  onRemove: () => void;
 }
 
-export const CartItem = ({ item }: CartItemProps) => {
-  const { updateQuantity, removeItem } = useCart();
-  const { product, quantity, productId } = item;
+export const CartItem = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => {
+  const { product, quantity } = item;
 
   return (
     <div className="cart-item d-flex align-items-center mb-3 pb-3 border-bottom">
@@ -39,7 +41,7 @@ export const CartItem = ({ item }: CartItemProps) => {
           </div>
           <button
             className="btn btn-link text-danger p-0 ms-2"
-            onClick={() => removeItem(productId)}
+            onClick={onRemove}
             aria-label="Eliminar producto"
           >
             <i className="bi bi-trash"></i>
@@ -50,7 +52,7 @@ export const CartItem = ({ item }: CartItemProps) => {
           <div className="quantity-controls d-flex align-items-center border rounded-pill px-2 py-1">
             <button
               className="btn btn-sm p-0"
-              onClick={() => updateQuantity(productId, quantity - 1)}
+              onClick={onDecrease}
               disabled={quantity <= 1}
             >
               <i className="bi bi-dash"></i>
@@ -58,7 +60,7 @@ export const CartItem = ({ item }: CartItemProps) => {
             <span className="mx-2 small fw-bold">{quantity}</span>
             <button
               className="btn btn-sm p-0"
-              onClick={() => updateQuantity(productId, quantity + 1)}
+              onClick={onIncrease}
             >
               <i className="bi bi-plus"></i>
             </button>

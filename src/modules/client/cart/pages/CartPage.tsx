@@ -1,8 +1,8 @@
 import { useCart } from '../hooks/useCart';
 import { CartItem } from '../components/CartItem/CartItem';
-import { Button } from '../../../shared/ui/Button';
-import { LoadingSpinner } from '../../../shared/ui/LoadingSpinner';
-import { formatCurrency } from '../../../shared/utils/formatCurrency';
+import { Button } from '../../../../shared/ui/Button';
+import { LoadingSpinner } from '../../../../shared/ui/LoadingSpinner';
+import { formatCurrency } from '../../../../shared/utils/formatCurrency';
 import './CartPage.css';
 
 export const CartPage = () => {
@@ -45,7 +45,7 @@ export const CartPage = () => {
       <h1 className="page-title">Mi Carrito</h1>
       <div className="cart-content">
         <div className="cart-items">
-          {cart.items.map((item) => (
+          {cart.items.map((item:any) => (
             <CartItem
               key={item.productId}
               item={item}
