@@ -1,5 +1,5 @@
 import { useCart } from '../../context/CartContext';
-import type { CartItemDto, CartItemModifierDto } from '../../../../core/application/dtos/cart/CartDto';
+import type { CartItemDto, CartItemModifierDto } from '../../../../../core/application/dtos/cart/CartDto';
 import './CartItem.css';
 
 interface CartItemProps {
