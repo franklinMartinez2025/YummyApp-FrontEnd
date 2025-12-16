@@ -1,4 +1,4 @@
-import type { ProductDto } from "../../../../../core/application/dtos/order/ProductDto";
+import type { ProductDto } from "../../../../../core/application/dtos/restaurant/ProductDto";
 import { useState } from "react";
 import './ProductCard.css';
 

@@ -23,6 +23,20 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const generateCartItemId = (productId: string, modifiers: CartItemModifierDto[] = []) => {
+    if (!modifiers || modifiers.length === 0) return productId;
+    
+    const sortedModifiers = [...modifiers].sort((a, b) => a.name.localeCompare(b.name));
+    const modifiersString = JSON.stringify(sortedModifiers);
+    let hash = 0;
+    for (let i = 0; i < modifiersString.length; i++) {
+        const char = modifiersString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return `${productId}-${hash}`;
+};
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [items, setItems] = useState<CartItemDto[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -32,26 +46,58 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!isAuthenticated) {
             setItems([]);
+        } else {
+             loadUserCart();
         }
     }, [isAuthenticated]);
 
-    // Helper to generate a unique ID for the cart item based on product and modifiers
-    const generateCartItemId = (productId: string, modifiers: CartItemModifierDto[] = []) => {
-        if (!modifiers || modifiers.length === 0) return productId;
-        
-        // Simple hash generation for modifiers to distinguish variations
-        const sortedModifiers = [...modifiers].sort((a, b) => a.name.localeCompare(b.name));
-        const modifiersString = JSON.stringify(sortedModifiers);
-        // Create a simple hash or just use the string if length permits, 
-        // but robustly we append a signature
-        let hash = 0;
-        for (let i = 0; i < modifiersString.length; i++) {
-            const char = modifiersString.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
+
+
+    const loadUserCart = useCallback(async () => {
+        if (!isAuthenticated || !user?.id) return;
+
+        try {
+            const userId = parseInt(user.id);
+            if (isNaN(userId)) return;
+
+            const response = await cartService.getCartsByUserId(userId);
+            if (response.data) {
+                const mappedItems: CartItemDto[] = response.data.map((dto) => {
+                    const modifiers: CartItemModifierDto[] = dto.modifierGroups.map(group => ({
+                        id: group.modifierGroupTemplateId,
+                        name: group.modifierGroupTemplateName,
+                        price: 0,
+                        options: group.options.map(opt => ({
+                            id: opt.id,
+                            name: opt.name,
+                            price: 0
+                        }))
+                    }));
+
+                    const cartItemId = generateCartItemId(dto.dishId.toString(), modifiers);
+                    const subtotal = dto.unitPrice * dto.quantity;
+
+                    return {
+                        productId: cartItemId,
+                        product: {
+                            id: dto.dishId.toString(),
+                            name: dto.dishName,
+                            price: dto.unitPrice,
+                            image: dto.dishImage,
+                            restaurantId: dto.restaurantId
+                        },
+                        quantity: dto.quantity,
+                        subtotal: subtotal,
+                        selectedModifiers: modifiers,
+                        specialInstructions: ''
+                    };
+                });
+                setItems(mappedItems);
+            }
+        } catch (error) {
+            console.error("Failed to load user cart:", error);
         }
-        return `${productId}-${hash}`;
-    };
+    }, [isAuthenticated, user, cartService]);
 
     const addItem = useCallback(async (
         product: ProductDto, 
@@ -59,16 +105,50 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         selectedModifiers: CartItemModifierDto[] = [], 
         specialInstructions = ''
     ) => {
-        // ... (addItem logic remains same)
-         // Call backend service
-         // We don't await strictly to block UI, but we should handle errors.
-         // For now, logging error.
+        setItems((prevItems) => {
+        
+            const existingItemIndex = prevItems.findIndex((item) => {
+                if (item.product.id !== product.id) return false;
+                
+                const itemModifiers = item.selectedModifiers || [];
+                const newModifiers = selectedModifiers || [];
+                
+                if (itemModifiers.length !== newModifiers.length) return false;
+                return JSON.stringify(itemModifiers) === JSON.stringify(newModifiers);
+            });
+
+            let unitPrice = product.price;
+            selectedModifiers?.forEach(mod => {
+               mod.options.forEach(opt => unitPrice += opt.price);
+            });
+
+            if (existingItemIndex > -1) {
+                const newItems = [...prevItems];
+                newItems[existingItemIndex].quantity += quantity;
+                newItems[existingItemIndex].subtotal = unitPrice * newItems[existingItemIndex].quantity;
+            
+                if (specialInstructions && newItems[existingItemIndex].specialInstructions !== specialInstructions) {
+
+                }
+
+                return newItems;
+            }
+            
+            const cartItemId = generateCartItemId(product.id, selectedModifiers);
+
+            return [...prevItems, {
+                product,
+                quantity,
+                productId: cartItemId,
+                subtotal: unitPrice * quantity,
+                selectedModifiers,
+                specialInstructions
+            }];
+        });
+        setIsOpen(true);
+
        try {
             if (isAuthenticated && user) {
-                // Determine restaurantId - try to get it from product if available (it might be missing in some DTO definitions)
-                 // Assuming product has restaurantId or we default. 
-                 // Note: The restaurant/ProductDto does not show restaurantId, but order/ProductDto does.
-                 // We will cast/check safely.
                  const restaurantId = product.restaurantId || (product as any).restaurantId || 0;
                  const dishId = parseInt(product.id) || 0;
 
@@ -101,49 +181,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.error("Error adding item to backend cart:", error);
         }
-
-        setItems((prevItems) => {
-        
-            const existingItemIndex = prevItems.findIndex((item) => {
-                if (item.product.id !== product.id) return false;
-                
-                const itemModifiers = item.selectedModifiers || [];
-                const newModifiers = selectedModifiers || [];
-                
-                if (itemModifiers.length !== newModifiers.length) return false;
-                return JSON.stringify(itemModifiers) === JSON.stringify(newModifiers);
-            });
-
-            // Calculate base price + modifiers
-            let unitPrice = product.price;
-            selectedModifiers?.forEach(mod => {
-               mod.options.forEach(opt => unitPrice += opt.price);
-            });
-
-            if (existingItemIndex > -1) {
-                const newItems = [...prevItems];
-                newItems[existingItemIndex].quantity += quantity;
-                newItems[existingItemIndex].subtotal = unitPrice * newItems[existingItemIndex].quantity;
-            
-                if (specialInstructions && newItems[existingItemIndex].specialInstructions !== specialInstructions) {
-
-                }
-
-                return newItems;
-            }
-            
-            const cartItemId = generateCartItemId(product.id, selectedModifiers);
-
-            return [...prevItems, {
-                product,
-                quantity,
-                productId: cartItemId,
-                subtotal: unitPrice * quantity,
-                selectedModifiers,
-                specialInstructions
-            }];
-        });
-        setIsOpen(true);
     }, [isAuthenticated, user, cartService]);
 
     const removeItem = useCallback(async (cartItemId: string) => {
@@ -187,7 +224,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         setItems((prevItems) =>
             prevItems.map((item) => {
                 if (item.productId === cartItemId) {
-                     // Recalculate subtotal
                      let unitPrice = item.product.price;
                      item.selectedModifiers?.forEach(mod => {
                         mod.options.forEach(opt => unitPrice += opt.price);
