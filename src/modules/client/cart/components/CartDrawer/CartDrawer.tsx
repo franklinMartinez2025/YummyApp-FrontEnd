@@ -65,7 +65,7 @@ export const CartDrawer = () => {
                             className="btn btn-primary w-100 py-2 fw-bold rounded-pill"
                             onClick={handleCheckout}
                         >
-                            Ir a Pagar
+                            Ir a Pagar 
                         </button>
                     </div>
                 )}

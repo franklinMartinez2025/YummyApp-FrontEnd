@@ -4,7 +4,7 @@ import type { RemoveFromCartDto } from "../../../application/dtos/cart/RemoveFro
 import type { GetCartsByUserIdDto } from "../../../application/dtos/cart/GetCartsByUserId.dto";
 
 export interface ICartGateway {
-    addToCart(addToCartDto: AddToCartDto): Promise<Response<boolean>>;
+    addToCart(addToCartDto: AddToCartDto): Promise<Response<number>>;
     removeFromCart(cartItem: RemoveFromCartDto): Promise<Response<boolean>>;
     getCartsByUserId(userId: number): Promise<Response<GetCartsByUserIdDto[]>>;
 }

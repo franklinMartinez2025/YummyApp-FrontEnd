@@ -3,5 +3,5 @@ export * from './AuthAdapter';
 export * from './RestaurantAdapter';
 export * from './ProductAdapter';
 export * from './CartAdapter';
-export * from './OrderAdapter';
+export * from './order/OrderAdapter';
 

@@ -1,6 +1,7 @@
 import type { GenericItemName } from "../../../../shared/types/common";
 
 export interface GetCartsByUserIdDto {
+  cartId: number;
   restaurantId: number;
   dishId: number;
   dishName: string;

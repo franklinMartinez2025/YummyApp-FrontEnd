@@ -9,6 +9,7 @@ import { CartAdapter } from '../../../../core/infrastructure/adapters/cart/CartA
 
 interface CartContextType {
     items: CartItemDto[];
+    cartId: number | null;
     isOpen: boolean;
     totalAmount: number;
     totalItems: number;
@@ -39,6 +40,7 @@ const generateCartItemId = (productId: string, modifiers: CartItemModifierDto[] 
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [items, setItems] = useState<CartItemDto[]>([]);
+    const [cartId, setCartId] = useState<number | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const { isAuthenticated, user } = useAuthContext();
     const cartService = useMemo(() => new CartService(new CartAdapter()), []);
@@ -92,6 +94,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                         specialInstructions: ''
                     };
                 });
+                
+                // Extract cartId from the first item if available
+                if (response.data.length > 0) {
+                    setCartId(response.data[0].cartId);
+                }
+                
                 setItems(mappedItems);
             }
         } catch (error) {
@@ -176,7 +184,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                      unitPrice: product.price,
                      modifierGroups: modifierGroups
                  };
-                 await cartService.addToCart(addToCartDto);
+                 const response = await cartService.addToCart(addToCartDto);
+                 
+                 if (response.success && response.data) {
+                     setCartId(response.data);
+                 }
             }
         } catch (error) {
             console.error("Error adding item to backend cart:", error);
@@ -242,6 +254,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const clearCart = useCallback(() => {
         setItems([]);
+        setCartId(null);
     }, []);
 
     const toggleCart = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -259,6 +272,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const value = useMemo(
         () => ({
             items,
+            cartId,
             isOpen,
             totalAmount,
             totalItems,
@@ -270,7 +284,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             openCart,
             closeCart,
         }),
-        [items, isOpen, totalAmount, totalItems, addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart]
+        [items, cartId, isOpen, totalAmount, totalItems, addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart]
     );
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -2,5 +2,6 @@
 export const API_SERVICES = {
   USERS: '/users',
   RESTAURANTS: '/restaurants',
-  CARTS: '/carts'
+  CARTS: '/carts',
+  ORDERS: '/orders'
 } as const;

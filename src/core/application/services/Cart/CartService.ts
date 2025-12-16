@@ -11,7 +11,7 @@ export class CartService {
         this.cartGateway = cartGateway;
     }
 
-    async addToCart(addToCartDto: AddToCartDto): Promise<Response<boolean>> {
+    async addToCart(addToCartDto: AddToCartDto): Promise<Response<number>> {
         return await this.cartGateway.addToCart(addToCartDto); 
     }
 

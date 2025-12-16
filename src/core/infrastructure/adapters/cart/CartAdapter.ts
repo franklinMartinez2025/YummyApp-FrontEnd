@@ -8,8 +8,8 @@ import type { GetCartsByUserIdDto } from "../../../application/dtos/cart/GetCart
 
 export class CartAdapter implements ICartGateway {
 
-    async addToCart(addToCartDto: AddToCartDto): Promise<Response<boolean>> {
-        return await apiClient.post<Response<boolean>>(`${API_SERVICES.CARTS}/Cart/AddCart`, {dto:addToCartDto});
+    async addToCart(addToCartDto: AddToCartDto): Promise<Response<number>> {
+        return await apiClient.post<Response<number>>(`${API_SERVICES.CARTS}/Cart/AddCart`, {dto:addToCartDto});
     }
 
     async removeFromCart(cartItem: RemoveFromCartDto): Promise<Response<boolean>> {

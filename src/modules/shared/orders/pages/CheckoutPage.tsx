@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../../client/cart/context/CartContext';
 import { useOrder } from '../hooks/useOrder';
 import { PaymentForm } from '../components/PaymentForm/PaymentForm';
+import { useAuthContext } from '../../../../shared/context/useAuthContext';
+import type { CreateOrderDto } from '../../../../core/application/dtos/order/CreateOrder.dto';
 import './CheckoutPage.css';
 
 export const CheckoutPage = () => {
     const navigate = useNavigate();
-    const { items, totalAmount, clearCart } = useCart();
+    const { items, totalAmount, clearCart, cartId } = useCart();
     const { createOrder, loadingState, orderId } = useOrder();
+    const { user } = useAuthContext();
 
     const [address, setAddress] = useState({
         street: '',
@@ -29,15 +32,34 @@ export const CheckoutPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!user || !user.id) {
+             // Handle not logged in - though likely protected route
+             console.error("User not logged in");
+             return;
+        }
 
-        const order = await createOrder({
-            items,
-            totalAmount,
-            deliveryAddress: address,
-            paymentMethod: paymentData
-        });
+        if (!cartId) {
+            console.error("Cart ID not found");
+            return;
+        }
 
-        if (order) {
+        const createOrderDto: CreateOrderDto = {
+            userId: parseInt(user.id),
+            cartId: cartId,
+            deliveryAddress: `${address.street}, ${address.city}, ${address.zipCode}. ${address.instructions}`,
+            items: items.map(item => ({
+                productId: parseInt(item.product.id),
+                productName: item.product.name,
+                unitPrice: item.product.price,
+                quantity: item.quantity,
+                note: item.specialInstructions || ''
+            }))
+        };
+
+        const success = await createOrder(createOrderDto);
+
+        if (success) {
             clearCart();
         }
     };
