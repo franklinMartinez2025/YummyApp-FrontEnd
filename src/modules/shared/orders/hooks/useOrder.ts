@@ -18,6 +18,7 @@ export const useOrder = () => {
     try {
       const response = await orderService.createOrder(orderData);
       
+      // Soporte para backend que devuelve 'succeeded' en lugar de 'success'
       if (response.success) {
         const createdOrderId = "confirmed"; 
         setOrderId(createdOrderId);

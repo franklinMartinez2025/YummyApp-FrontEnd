@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useRoles } from '../hooks/useRoles';
 import { useAuthContext } from '../../../../shared/context/useAuthContext';
 
 interface RegisterFormProps {
@@ -16,20 +15,13 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [roleName, setRole] = useState('');
     const [passError, setPassError] = useState('');
 
     const { register, login, isLoading, error } = useAuth();
-    const { roles, isLoading: isLoadingRoles, error: rolesError } = useRoles();
     const { login: contextLogin } = useAuthContext();
     const navigate = useNavigate();
 
-    /** Selecciona automáticamente el primer rol disponible */
-    useEffect(() => {
-        if (roles.length > 0 && !roleName) {
-            setRole(roles[0].name);
-        }
-    }, [roles, roleName]);
+
 
     /** Procesa el registro y luego inicia sesión automáticamente */
     const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +33,7 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
             return;
         }
 
-        const result = await register(email, password, name, phone, roleName);
+        const result = await register(email, password, name, phone);
 
         if (result.success) {
             const loginResult = await login(email, password);
@@ -91,11 +83,7 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
                 </div>
             )}
 
-            {rolesError && (
-                <div className="alert alert-danger border-0 bg-danger bg-opacity-25 text-white mb-4" role="alert">
-                    <i className="bi bi-exclamation-circle me-2"></i> {rolesError}
-                </div>
-            )}
+
 
             <form onSubmit={handleSubmit}>
                 <div className="form-floating mb-3">
@@ -137,35 +125,7 @@ export const RegisterForm = ({ onSuccess, onLoginClick }: RegisterFormProps) => 
                     <label htmlFor="floatingPhone">Teléfono</label>
                 </div>
 
-                <div className="form-floating mb-3">
-                    <select
-                        className="form-select"
-                        id="floatingRole"
-                        value={roleName}
-                        onChange={(e) => setRole(e.target.value)}
-                        aria-label="Seleccionar Rol"
-                        disabled={isLoadingRoles || roles.length === 0}
-                        required
-                        style={{
-                            color: 'white',
-                            WebkitAppearance: 'none',
-                            MozAppearance: 'none'
-                        }}
-                    >
-                        {isLoadingRoles ? (
-                            <option value="">Cargando roles...</option>
-                        ) : roles.length === 0 ? (
-                            <option value="">No hay roles disponibles</option>
-                        ) : (
-                            roles.map((roleItem) => (
-                                <option key={roleItem.id} value={roleItem.name}>
-                                    {roleItem.name}
-                                </option>
-                            ))
-                        )}
-                    </select>
-                    <label htmlFor="floatingRole">Rol</label>
-                </div>
+
 
                 <div className="form-floating mb-3">
                     <input

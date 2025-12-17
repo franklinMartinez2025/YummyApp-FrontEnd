@@ -1,6 +1,10 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
+export interface ApiRequestOptions extends RequestInit {
+  skipAuth?: boolean;
+}
+
 export class ApiClient {
   
   private baseURL: string;
@@ -11,15 +15,20 @@ export class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: ApiRequestOptions = {}
   ): Promise<T> {
     const token = localStorage.getItem('auth_token');
     
+    // Configurar headers base
     const headers: HeadersInit = {
       ...( !(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     };
+
+    // Solo agregar token si existe Y no se solicitó saltar autenticación
+    if (token && !options.skipAuth) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
 
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...options,
@@ -28,8 +37,12 @@ export class ApiClient {
 
     if (!response.ok) {
       if (response.status === 401) {
-        window.dispatchEvent(new Event('auth:unauthorized'));
-        throw new Error('Sesión expirada o inválida');
+        // Solo emitir evento de no autorizado si SE INTENTÓ autenticar
+        // Si era una petición pública (skipAuth) y falló con 401, es otro tipo de problema, pero no necesariamente expiración de sesión
+        if (!options.skipAuth) {
+            window.dispatchEvent(new Event('auth:unauthorized'));
+            throw new Error('Sesión expirada o inválida');
+        }
       }
       throw new Error(`API Error: ${response.statusText}`);
     }
@@ -37,34 +50,38 @@ export class ApiClient {
     return response.json();
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  async get<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: unknown): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, options: ApiRequestOptions = {}): Promise<T> {
     return this.request<T>(endpoint, {
+      ...options,
       method: 'POST',
       body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
 
 
-  async put<T>(endpoint: string, data?: unknown): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown, options: ApiRequestOptions = {}): Promise<T> {
     return this.request<T>(endpoint, {
+      ...options,
       method: 'PUT',
       body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
 
-  async patch<T>(endpoint: string, data?: unknown): Promise<T> {
+  async patch<T>(endpoint: string, data?: unknown, options: ApiRequestOptions = {}): Promise<T> {
     return this.request<T>(endpoint, {
+      ...options,
       method: 'PATCH',
       body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
 
-  async delete<T>(endpoint: string, data?: unknown): Promise<T> {
+  async delete<T>(endpoint: string, data?: unknown, options: ApiRequestOptions = {}): Promise<T> {
     return this.request<T>(endpoint, {
+      ...options,
       method: 'DELETE',
       body: data ? JSON.stringify(data) : undefined,
     });

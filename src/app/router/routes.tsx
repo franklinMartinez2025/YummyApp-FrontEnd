@@ -13,6 +13,7 @@ import ForgotPasswordPage from '../../modules/shared/auth/pages/ForgotPasswordPa
 import ResetPasswordPage from '../../modules/shared/auth/pages/ResetPasswordPage';
 import { CheckoutPage } from '../../modules/shared/orders/pages/CheckoutPage';
 import ClientOrdersPage from '../../modules/client/orders/pages/ClientOrdersPage';
+import CreateRestaurantPage from '../../modules/shared/pages/CreateRestaurantPage';
 // Páginas de administrador
 import AdminDashboardPage from '../../modules/admin/dashboard/pages/AdminDashboardPage';
 import AdminRestaurantsPage from '../../modules/admin/restaurants/pages/AdminRestaurantsPage';
@@ -43,6 +44,13 @@ export const AppRouter = () => (
         <Route path="restaurants/:id" element={<RestaurantDetailPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="orders" element={<ClientOrdersPage />} />
+      </Route>
+
+      {/* Rutas protegidas para clientes (requieren auth) */}
+      <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
+        <Route element={<PublicLayout />}>
+          <Route path="create-restaurant" element={<CreateRestaurantPage />} />
+        </Route>
       </Route>
       <Route path="/auth" element={<AuthLayout />}>
         <Route index element={<LoginPage />} />

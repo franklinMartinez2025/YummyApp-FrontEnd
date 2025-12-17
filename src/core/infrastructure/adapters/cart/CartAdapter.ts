@@ -17,7 +17,8 @@ export class CartAdapter implements ICartGateway {
     }
 
     async getCartsByUserId(userId: number): Promise<Response<GetCartsByUserIdDto[]>> {
-        return await apiClient.get<Response<GetCartsByUserIdDto[]>>(`${API_SERVICES.CARTS}/Cart/GetCartsByUserId?userId=${userId}`);
+        const timestamp = new Date().getTime();
+        return await apiClient.get<Response<GetCartsByUserIdDto[]>>(`${API_SERVICES.CARTS}/Cart/GetCartsByUserId?userId=${userId}&timestamp=${timestamp}`);
     }
 }
     

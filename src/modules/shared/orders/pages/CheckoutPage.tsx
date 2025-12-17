@@ -48,19 +48,36 @@ export const CheckoutPage = () => {
             userId: parseInt(user.id),
             cartId: cartId,
             deliveryAddress: `${address.street}, ${address.city}, ${address.zipCode}. ${address.instructions}`,
-            items: items.map(item => ({
-                productId: parseInt(item.product.id),
-                productName: item.product.name,
-                unitPrice: item.product.price,
-                quantity: item.quantity,
-                note: item.specialInstructions || ''
-            }))
+            items: items.map(item => {
+                // Serializar modificadores si existen
+                const modifiersNote = item.selectedModifiers && item.selectedModifiers.length > 0
+                    ? JSON.stringify(item.selectedModifiers)
+                    : '';
+                
+                // Combinar instrucciones especiales con modificadores
+                // Si hay ambos, separarlos con un pipe o algo distintivo, o simplemente concatenar
+                // El backend probablemente solo guardará el string
+                let finalNote = item.specialInstructions || '';
+                if (modifiersNote) {
+                    finalNote = finalNote ? `${finalNote} | Modifiers: ${modifiersNote}` : `Modifiers: ${modifiersNote}`;
+                }
+
+                return {
+                    productId: parseInt(item.product.id),
+                    productName: item.product.name,
+                    unitPrice: item.product.price,
+                    quantity: item.quantity,
+                    note: finalNote
+                };
+            })
         };
 
         const success = await createOrder(createOrderDto);
 
         if (success) {
-            clearCart();
+            // Limpiar visualmente el carrito (local state)
+            // Se asume que el backend procesa la orden y limpia su persistencia
+            clearCart(); 
         }
     };
 

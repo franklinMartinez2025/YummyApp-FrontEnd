@@ -13,7 +13,7 @@ interface HeroSectionProps {
 export const HeroSection = ({ slides }: HeroSectionProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  useEffect(() => {
+  useEffect(() => { 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);

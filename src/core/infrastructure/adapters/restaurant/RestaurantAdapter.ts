@@ -8,10 +8,10 @@ import type { RestaurantDetailDto } from "../../../application/dtos/restaurant/R
 export class RestaurantAdapter implements IRestaurantGateway {
     
     async getAvailableRestaurants(): Promise<Response<GetAvailableRestaurantDto[]>> {
-        return await apiClient.get<Response<GetAvailableRestaurantDto[]>>(`${API_SERVICES.RESTAURANTS}/RestaurantInfo/GetAvailableRestaurants`);
+        return await apiClient.get<Response<GetAvailableRestaurantDto[]>>(`${API_SERVICES.RESTAURANTS}/RestaurantInfo/GetAvailableRestaurants`, { skipAuth: true });
     }
 
     async getRestaurantDetailsById(restaurantId:number): Promise<Response<RestaurantDetailDto>> {
-        return await apiClient.get<Response<RestaurantDetailDto>>(`${API_SERVICES.RESTAURANTS}/RestaurantInfo/GetRestaurantDetailsById?RestaurantId=${restaurantId}`);
+        return await apiClient.get<Response<RestaurantDetailDto>>(`${API_SERVICES.RESTAURANTS}/RestaurantInfo/GetRestaurantDetailsById?RestaurantId=${restaurantId}`, { skipAuth: true });
     }
 }

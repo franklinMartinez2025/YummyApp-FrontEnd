@@ -15,7 +15,7 @@ export const useAuth = () => {
     try {
       const result = await authService.login(email, password);
 
-      if (result.succeeded && result.data) {
+      if (result.success && result.data) {
         const { jwToken, refreshToken, ...user } = result.data;
         return { success: true, user, token: jwToken, refreshToken };
       } else {
@@ -40,8 +40,7 @@ export const useAuth = () => {
     email: string,
     password: string,
     fullName: string,
-    phoneNumber: string,
-    roleName: string
+    phoneNumber: string
   ) => {
     setIsLoading(true);
     setError(null);
@@ -51,11 +50,10 @@ export const useAuth = () => {
         email,
         password,
         fullName,
-        phoneNumber,
-        roleName
+        phoneNumber
       );
 
-      if (result.succeeded) {
+      if (result.success) {
         return { success: true };
       } else {
         throw new Error(result.message || "Error al registrarse");
@@ -90,7 +88,7 @@ export const useAuth = () => {
     try {
       const result = await authService.forgotPassword(email);
 
-      if (result.succeeded) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         throw new Error(result.message || "Error al solicitar recuperación");
@@ -121,7 +119,7 @@ export const useAuth = () => {
     try {
       const result = await authService.resetPassword(email, token, newPassword);
 
-      if (result.succeeded) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         throw new Error(result.message || "Error al restablecer contraseña");
@@ -148,7 +146,7 @@ export const useAuth = () => {
     try {
       const result = await authService.validateToken(token);
 
-      if (result.succeeded) {
+      if (result.success) {
         return { success: true, isValid: true };
       } else {
         throw new Error(result.message || "Token inválido o expirado");

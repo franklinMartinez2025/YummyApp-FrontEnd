@@ -1,13 +1,27 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthContext } from '../../../../context/useAuthContext';
 import { RoleSelectionModal } from '../../../../../modules/shared/auth/components/RoleSelectionModal';
+import { NotificationDropdown } from './NotificationDropdown';
 
 export const PublicHeader = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { isAuthenticated, user, logout, setActiveRole } = useAuthContext();
   const navigate = useNavigate();
+
+  // Cerrar notificaciones al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.nav-item.dropdown')) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const toggleNav = () => {
     setIsNavOpen((prev) => !prev);
@@ -64,11 +78,37 @@ export const PublicHeader = () => {
                     <i className="bi bi-house-door me-2" /> Inicio
                   </Link>
                 </li>
-                <li className="nav-item">
-                  <Link to="/restaurantes" className="nav-link nav-link-custom" onClick={closeNav}>
-                    <i className="bi bi-fork-knife me-2" /> Restaurantes
-                  </Link>
-                </li>
+                {isAuthenticated && user?.roles?.some(r => r.toLowerCase() === 'cliente') && (
+                  <li className="nav-item">
+                    <Link to="/create-restaurant" className="nav-link nav-link-custom fw-semibold text-primary" onClick={closeNav}>
+                      <i className="bi bi-shop me-2" /> ¡Publica tu Restaurante!
+                    </Link>
+                  </li>
+                )}
+                {isAuthenticated && user?.roles?.some(r => r.toLowerCase() === 'cliente') && (
+                  <li className="nav-item me-lg-2 dropdown">
+                    <button 
+                        className={`btn btn-link nav-link position-relative text-dark d-flex align-items-center ${isNotificationsOpen ? 'show' : ''}`} 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsNotificationsOpen(!isNotificationsOpen);
+                            // Cerrar otros menús si es necesario
+                            setIsRoleModalOpen(false);
+                        }}
+                        aria-expanded={isNotificationsOpen}
+                        aria-label="Notificaciones"
+                    >
+                       <i className={`bi ${isNotificationsOpen ? 'bi-bell-fill' : 'bi-bell'} fs-5`}></i>
+                       <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.6rem',  marginTop: '5px', marginLeft: '-5px'}}>
+                         3
+                         <span className="visually-hidden">mensajes no leídos</span>
+                       </span>
+                    </button>
+                    {isNotificationsOpen && (
+                        <NotificationDropdown onClose={() => setIsNotificationsOpen(false)} />
+                    )}
+                  </li>
+                )}
                 <li className="nav-item ms-lg-3">
                   {isAuthenticated && user ? (
                     <div className="dropdown">

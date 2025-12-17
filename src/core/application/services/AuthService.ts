@@ -28,15 +28,13 @@ export class AuthService {
     email: string,
     password: string,
     fullName: string,
-    phoneNumber: string,
-    role: string
+    phoneNumber: string
   ): Promise<Response<boolean>> {
     return await this.authGateway.register({
       email,
       password,
       fullName,
       phoneNumber,
-      roleName: role,
     });
   }
 
