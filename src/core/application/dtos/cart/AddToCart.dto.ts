@@ -1,6 +1,7 @@
 export interface AddToCartDto {
   userId: number;
   restaurantId: number;
+  restaurantName: string;
   dishId: number;
   dishName: string;
   dishImage: string;

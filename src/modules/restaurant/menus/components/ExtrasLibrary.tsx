@@ -13,19 +13,21 @@ interface ExtrasLibraryProps {
     onRefresh: () => void;
 }
 
+import { useRestaurantContext } from '../../context/RestaurantContext';
+
 export const ExtrasLibrary = ({ items, setItems, inactiveItems, setInactiveItems, groups, setGroups, onRefresh }: ExtrasLibraryProps) => {
     const [activeTab, setActiveTab] = useState<'items' | 'groups'>('items');
     const [newItemName, setNewItemName] = useState('');
     const [editingGroup, setEditingGroup] = useState<ModifierGroupsTemplateDto | null>(null);
     const { createComponent, desactivateComponent, activateComponent, createGroup } = useMenu();
-    const RESTAURANT_ID = 1;
+    const { restaurantId } = useRestaurantContext();
 
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newItemName.trim()) return;
+        if (!newItemName.trim() || !restaurantId) return;
 
         const response = await createComponent({
-            restaurantId: RESTAURANT_ID,
+            restaurantId: restaurantId,
             name: newItemName.trim()
         });
         if (response.success) {
@@ -36,10 +38,11 @@ export const ExtrasLibrary = ({ items, setItems, inactiveItems, setInactiveItems
     };
 
     const handleDeleteItem = async (id: number) => {
+        if (!restaurantId) return;
         if (!window.confirm('¿Seguro de desactivar este componente? Pasará a la lista de Inactivos.')) return;
         
         const response = await desactivateComponent({
-             restaurantId: RESTAURANT_ID,
+             restaurantId: restaurantId,
              componentId: id
         });
 
@@ -53,8 +56,9 @@ export const ExtrasLibrary = ({ items, setItems, inactiveItems, setInactiveItems
     };
 
     const handleActivateItem = async (id: number) => {
+        if (!restaurantId) return;
         const response = await activateComponent({
-             restaurantId: RESTAURANT_ID,
+             restaurantId: restaurantId,
              componentId: id
         });
 
@@ -79,7 +83,7 @@ export const ExtrasLibrary = ({ items, setItems, inactiveItems, setInactiveItems
     };
 
     const handleSaveGroup = async () => {
-        if (!editingGroup) return;
+        if (!editingGroup || !restaurantId) return;
 
         const exists = groups.some(g => g.id === editingGroup.id);
         
@@ -90,7 +94,7 @@ export const ExtrasLibrary = ({ items, setItems, inactiveItems, setInactiveItems
         } else {
             // Create New Group via API
             const dto = {
-                restaurantId: RESTAURANT_ID,
+                restaurantId: restaurantId,
                 name: editingGroup.name,
                 minSelect: editingGroup.minSelection,
                 maxSelect: editingGroup.maxSelection,

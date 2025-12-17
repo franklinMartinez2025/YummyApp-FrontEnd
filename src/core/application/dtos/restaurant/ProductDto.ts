@@ -14,4 +14,5 @@ export interface ProductDto {
     }[];
   }[];
   restaurantId?: number; // Added to capture restaurant context
+  restaurantName?: string;
 }

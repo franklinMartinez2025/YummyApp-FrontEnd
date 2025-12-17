@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../../context/useAuthContext';
+import { useRestaurantContext } from '../../../../../modules/restaurant/context/RestaurantContext';
 import { RoleSelectionModal } from '../../../../../modules/shared/auth/components/RoleSelectionModal';
 import '../styles/RestaurantHeader.css';
 
 export const RestaurantHeader = () => {
   const { user, logout, setActiveRole } = useAuthContext();
+  const { restaurantName, restaurantId } = useRestaurantContext();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,7 +125,9 @@ export const RestaurantHeader = () => {
                 </div>
                 <div className="restaurant-user-info">
                   <span className="restaurant-user-name">{user?.fullName || 'Restaurante'}</span>
-                  <span className="restaurant-user-role">Administrador</span>
+                  <span className="restaurant-user-role">
+                      {restaurantName ? `${restaurantName} (ID: ${restaurantId})` : 'Administrador'}
+                  </span>
                 </div>
                 <i className="bi bi-chevron-down restaurant-user-chevron"></i>
               </button>
@@ -142,6 +146,11 @@ export const RestaurantHeader = () => {
                         <div>
                           <p className="restaurant-user-name-large">{user?.fullName || 'Restaurante'}</p>
                           <p className="restaurant-user-email">{user?.email || ''}</p>
+                          {restaurantName && (
+                              <p style={{fontSize: '0.8rem', color: '#666', marginTop: '4px'}}>
+                                  {restaurantName} #{restaurantId}
+                              </p>
+                          )}
                         </div>
                       </div>
                       <div className="restaurant-dropdown-divider"></div>

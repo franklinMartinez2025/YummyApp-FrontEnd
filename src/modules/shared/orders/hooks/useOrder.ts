@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CreateOrderDto } from "../../../../core/application/dtos/order/CreateOrder.dto";
+import type { GetMyOrderDto } from "../../../../core/application/dtos/order/GetMyOrder.dto";
 import { OrderService } from "../../../../core/application/services/Order/OrderService";
 import { OrderAdapter } from "../../../../core/infrastructure/adapters/order/OrderAdapter";
 import type { ApiStatus as LoadingState } from "../../../../shared/types/common";
@@ -42,8 +43,30 @@ export const useOrder = () => {
     setOrderId(null);
   };
 
+  const [myOrders, setMyOrders] = useState<GetMyOrderDto[]>([]);
+
+  const fetchMyOrders = async (userId: number) => {
+    setLoadingState("loading");
+    try {
+        const response = await orderService.getMyOrders(userId);
+        if (response.success && response.data) {
+            setMyOrders(response.data);
+            setLoadingState("success");
+            return response.data;
+        } else {
+             setLoadingState("error");
+             return [];
+        }
+    } catch (e) {
+        setLoadingState("error");
+        return [];
+    }
+  };
+
   return {
     createOrder,
+    fetchMyOrders,
+    myOrders,
     resetOrder,
     loadingState,
     error,

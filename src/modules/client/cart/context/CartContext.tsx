@@ -87,7 +87,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                             name: dto.dishName,
                             price: dto.unitPrice,
                             image: dto.dishImage,
-                            restaurantId: dto.restaurantId
+                            restaurantId: dto.restaurantId,
+                            restaurantName: dto.restaurantName
                         },
                         quantity: dto.quantity,
                         subtotal: subtotal,
@@ -178,6 +179,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                  const addToCartDto: AddToCartDto = {
                      userId: parsedUserId, 
                      restaurantId: restaurantId,
+                     restaurantName: product.restaurantName || "Restaurante",
                      dishId: dishId,
                      dishImage: product.image,
                      dishName: product.name,

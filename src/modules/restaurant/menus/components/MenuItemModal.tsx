@@ -3,7 +3,9 @@ import '../styles/MenuItemModal.css';
 import { AlertDialog, type AlertType } from '../../../shared/components/AlertDialog';
 import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/FoodItem.dto';
 import type { GenericItemName } from '../../../../shared/types/common';
-import type {ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
+import { useRestaurantContext } from '../../context/RestaurantContext';
+import { useMenu } from '../hooks/useMenu';
+import type { ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
 
 interface MenuItemModalProps {
   isOpen: boolean;
@@ -38,8 +40,36 @@ export const MenuItemModal = ({
         stock: 0
     });
 
+    const { restaurantId } = useRestaurantContext();
+    const { createCategory } = useMenu();
 
+    const handleCreateCategory = async () => {
+        if (!formData.categoryName || formData.categoryName.trim() === '') {
+             // Maybe show error or focus?
+             return;
+        }
+        if (!restaurantId) return;
 
+        const response = await createCategory({
+            name: formData.categoryName,
+            restaurantId: restaurantId
+        });
+
+        if (response.success && response.data) {
+            const newCategory = { id: response.data, name: formData.categoryName };
+            setCategories(prev => [...prev, newCategory]);
+            setFormData(prev => ({
+                ...prev,
+                categoryId: newCategory.id,
+                categoryName: newCategory.name
+            }));
+            setIsAddingCategory(false);
+        } else {
+            // handle error?
+            console.error("Failed to create category");
+        }
+    };
+    
     const [categories, setCategories] = useState<GenericItemName[]>(availableCategories);
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [activeTab, setActiveTab] = useState<'info' | 'extras'>('info');
@@ -242,7 +272,24 @@ export const MenuItemModal = ({
                                         <label className="form-label-custom">Categoría</label>
                                         <div className="d-flex gap-2">
                                             {isAddingCategory ? (
-                                                <input type="text" className="form-control-custom animate-fade-in" name="categoryName" value={formData.categoryName} onChange={handleChange} placeholder="Nueva..." autoFocus />
+                                                <>
+                                                    <input 
+                                                        type="text" 
+                                                        className="form-control-custom animate-fade-in" 
+                                                        name="categoryName" 
+                                                        value={formData.categoryName} 
+                                                        onChange={handleChange} 
+                                                        placeholder="Nueva..." 
+                                                        autoFocus 
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        className="btn btn-success rounded-3 px-3 animate-fade-in"
+                                                        onClick={handleCreateCategory}
+                                                    >
+                                                        <i className="bi bi-check-lg"></i>
+                                                    </button>
+                                                </>
                                             ) : (
                                                 <select className="form-control-custom" name="categoryId" value={formData.categoryId} onChange={handleCategoryChange} required>
                                                     <option value={0} disabled>Seleccionar...</option>

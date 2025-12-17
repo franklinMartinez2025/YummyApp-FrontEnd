@@ -3,11 +3,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuthContext } from '../../../../context/useAuthContext';
 import { RoleSelectionModal } from '../../../../../modules/shared/auth/components/RoleSelectionModal';
 import { NotificationDropdown } from './NotificationDropdown';
+import { OrderAccessModal } from './OrderAccessModal';
 
 export const PublicHeader = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const { isAuthenticated, user, logout, setActiveRole } = useAuthContext();
   const navigate = useNavigate();
 
@@ -129,9 +131,15 @@ export const PublicHeader = () => {
                           </Link>
                         </li>
                         <li>
-                          <Link className="dropdown-item" to="/pedidos" onClick={closeNav}>
+                          <button 
+                            className="dropdown-item" 
+                            onClick={() => {
+                                setIsOrderModalOpen(true);
+                                closeNav();
+                            }}
+                          >
                             <i className="bi bi-box-seam me-2" /> Mis Pedidos
-                          </Link>
+                          </button>
                         </li>
                         {user.roles && user.roles.length > 1 && (
                           <li>
@@ -187,6 +195,11 @@ export const PublicHeader = () => {
           onSelect={handleRoleSelect}
         />
       )}
+      
+      <OrderAccessModal 
+        isOpen={isOrderModalOpen} 
+        onClose={() => setIsOrderModalOpen(false)} 
+      />
     </>
   );
 };

@@ -3,11 +3,16 @@ import type { IOrderGateway } from '../../../domain/gateways/order/IOrderGateway
 import { apiClient } from '../../api/apiClient';
 import type { Response } from '../../../../shared/types/api';
 import { API_SERVICES } from '../../../config/api.config';
+import type { GetMyOrderDto } from '../../../application/dtos/order/GetMyOrder.dto';
 
 export class OrderAdapter implements IOrderGateway {
   
   async createOrder(order: CreateOrderDto): Promise<Response<boolean>> {
     return await apiClient.post<Response<boolean>>(`${API_SERVICES.ORDERS}/Orders/CreateOrder`, order);
+  }
+
+  async getMyOrders(userId: number): Promise<Response<GetMyOrderDto[]>> {
+    return await apiClient.get<Response<GetMyOrderDto[]>>(`${API_SERVICES.ORDERS}/Orders/GetMyOrders?userId=${userId}`);
   }
 
 }

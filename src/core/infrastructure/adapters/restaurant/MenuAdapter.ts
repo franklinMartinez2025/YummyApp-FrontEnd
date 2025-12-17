@@ -9,6 +9,7 @@ import type { CreateComponentDto } from "../../../application/dtos/restaurant/Cr
 import type { DesactivateComponentDto } from "../../../application/dtos/restaurant/DesactivateComponent.dto";
 import type { ActivateComponentDto } from "../../../application/dtos/restaurant/ActivateComponent.dto";
 import type { CreateGroupDto } from "../../../application/dtos/restaurant/CreateGroup.dto";
+import type { CreateCategoryDto } from "../../../application/dtos/restaurant/CreateCategory.dto";
 
 export class MenuAdapter implements IMenuGateway {
   async getInitialData(restaurantId: number): Promise<Response<MenuViewModel>> {
@@ -71,5 +72,9 @@ export class MenuAdapter implements IMenuGateway {
 
   async createGroup(data: CreateGroupDto): Promise<Response<boolean>> {
     return await apiClient.post<Response<boolean>>(`${API_SERVICES.RESTAURANTS}/Menu/CreateGroup`, {dto:data});
+  }
+
+  async createCategory(data: CreateCategoryDto): Promise<Response<number>> {
+    return await apiClient.post<Response<number>>(`${API_SERVICES.RESTAURANTS}/Menu/CreateCategory`, data);
   }
 }

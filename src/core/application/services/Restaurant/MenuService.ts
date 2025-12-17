@@ -8,6 +8,7 @@ import type { CreateComponentDto } from "../../dtos/restaurant/CreateComponent.d
 import type { DesactivateComponentDto } from "../../dtos/restaurant/DesactivateComponent.dto";
 import type { ActivateComponentDto } from "../../dtos/restaurant/ActivateComponent.dto";
 import type { CreateGroupDto } from "../../dtos/restaurant/CreateGroup.dto";
+import type { CreateCategoryDto } from "../../dtos/restaurant/CreateCategory.dto";
 
 export class MenuService {
     
@@ -53,6 +54,11 @@ export class MenuService {
 
     async createGroup(data: CreateGroupDto): Promise<Response<boolean>> {
         const response = await this.menuGateway.createGroup(data);
+        return response;
+    }
+
+    async createCategory(data: CreateCategoryDto): Promise<Response<number>> {
+        const response = await this.menuGateway.createCategory(data);
         return response;
     }
 }   

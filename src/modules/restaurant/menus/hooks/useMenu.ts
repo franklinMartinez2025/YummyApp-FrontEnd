@@ -9,6 +9,7 @@ import type { CreateComponentDto } from '../../../../core/application/dtos/resta
 import type { DesactivateComponentDto } from '../../../../core/application/dtos/restaurant/DesactivateComponent.dto';
 import type { ActivateComponentDto } from '../../../../core/application/dtos/restaurant/ActivateComponent.dto';
 import type { CreateGroupDto } from '../../../../core/application/dtos/restaurant/CreateGroup.dto';
+import type { CreateCategoryDto } from '../../../../core/application/dtos/restaurant/CreateCategory.dto';
 
 export const useMenu = () => {
     const [loading, setLoading] = useState(false);
@@ -122,6 +123,21 @@ export const useMenu = () => {
         }
     };
 
+    const createCategory = async (category: CreateCategoryDto): Promise<Response<number>> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await menuService.createCategory(category);
+            return response;
+        } catch (err) {
+            console.error(err);
+            setError("Error al crear la categoría.");
+            return { success: false, message: "Error al crear la categoría", data: 0 } as Response<number>;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         getInitialData,
         registerDish,
@@ -130,6 +146,7 @@ export const useMenu = () => {
         desactivateComponent,
         activateComponent,
         createGroup,
+        createCategory,
         loading,
         error
     };

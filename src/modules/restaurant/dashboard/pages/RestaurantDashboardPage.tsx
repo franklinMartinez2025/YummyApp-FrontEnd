@@ -1,6 +1,16 @@
+import { useRestaurantContext } from '../../context/RestaurantContext';
 import '../../dashboard/styles/RestaurantDashboardPage.css';
 
 const RestaurantDashboardPage = () => {
+    const { restaurantName } = useRestaurantContext();
+    
+    // Get current date formatted in Spanish
+    const currentDate = new Date();
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+    const dateString = currentDate.toLocaleDateString('es-ES', options);
+    // Capitalize first letter (e.g., "jueves, 5 de diciembre" -> "Jueves, 5 de diciembre")
+    const formattedDate = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+
     // Mock Data for Charts
     const WEEKLY_SALES = [
         { day: 'Lun', height: '40%' },
@@ -19,8 +29,8 @@ const RestaurantDashboardPage = () => {
                 {/* Hero Section */}
                 <div className="row mb-4 animate-slide-up">
                     <div className="col-12 welcome-hero">
-                        <h1 className="welcome-title">Hola, Yummy Burger 👋</h1>
-                        <p className="welcome-subtitle">Aquí tienes el resumen de tu operación hoy, Jueves 05 de Diciembre.</p>
+                        <h1 className="welcome-title">Hola, bienvenido a tu restaurante "{restaurantName || 'YummyApp'}" 👋</h1>
+                        <p className="welcome-subtitle">Aquí tienes el resumen de tu operación hoy, {formattedDate}.</p>
                     </div>
                 </div>
 

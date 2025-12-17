@@ -8,6 +8,9 @@ export interface CreateOrderDto {
 export interface CreateOrderItemDto {
   productId: number;
   productName: string;
+  imageUrl: string;
+  restaurantId: number;
+  restaurantName: string;
   unitPrice: number;
   quantity: number;
   note?: string;

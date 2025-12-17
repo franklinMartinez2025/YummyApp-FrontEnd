@@ -4,12 +4,11 @@ import { MenuItemModal } from '../components/MenuItemModal';
 import { CategoryManagerModal } from '../components/CategoryManagerModal';
 import { ExtrasLibrary} from '../components/ExtrasLibrary';
 import { useMenu } from '../hooks/useMenu';
+import { useRestaurantContext } from '../../context/RestaurantContext';
 import type { GenericItemName } from '../../../../shared/types/common';
 import type { FoodItemDto } from '../../../../core/application/dtos/restaurant/FoodItem.dto';
 import type { ModifierGroupsTemplateDto } from '../../../../core/application/dtos/restaurant/ModifierGroupsTemplate.dto';
 import { LoadingSpinner } from '../../../../shared/ui/LoadingSpinner/LoadingSpinner';
-
-
 
 const RestaurantMenuPage = () => {
   const [activeSection, setActiveSection] = useState<'menu' | 'library'>('menu');
@@ -25,12 +24,14 @@ const RestaurantMenuPage = () => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<FoodItemDto | undefined>(undefined);
   const { getInitialData, registerDish, updateDish } = useMenu();
-  const RESTAURANT_ID = 1;
+  const { restaurantId } = useRestaurantContext();
 
   const fetchData = async () => {
+    if (!restaurantId) return;
+
     setLoading(true);
     try {
-        const response = await getInitialData(RESTAURANT_ID); 
+        const response = await getInitialData(restaurantId); 
         if (response && response.success && response.data) {
             setCategories(response.data.categories);
             setItems(response.data.foodItems);
@@ -48,8 +49,10 @@ const RestaurantMenuPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (restaurantId) {
+        fetchData();
+    }
+  }, [restaurantId]);
 
   // ... (keeping existing useMemo and handle functions) ...
 
@@ -75,6 +78,10 @@ const RestaurantMenuPage = () => {
   };
 
   const handleSave = async (item: FoodItemDto, imageFile?: File) => {
+      if (!restaurantId) {
+          alert("Error: No se ha identificado el restaurante.");
+          return;
+      }
       setLoading(true);
       try {
         let response;
@@ -98,7 +105,7 @@ const RestaurantMenuPage = () => {
         } else {
             // CREAR
             const registerDto: import('../../../../core/application/dtos/restaurant/RegisterDish.dto').RegisterDishDto = {
-                restaurantId: RESTAURANT_ID,
+                restaurantId: restaurantId,
                 name: item.dishName,
                 categoryId: item.categoryId || (categories.find(c => c.name === item.categoryName)?.id || 0), // Try to find ID from name if missing
                 description: item.description,
@@ -113,7 +120,7 @@ const RestaurantMenuPage = () => {
         }
         
         if (response.success) {
-             const refreshResponse = await getInitialData(RESTAURANT_ID);
+             const refreshResponse = await getInitialData(restaurantId);
              if (refreshResponse.success && refreshResponse.data) {
                  setItems(refreshResponse.data.foodItems);
                  setCategories(refreshResponse.data.categories);

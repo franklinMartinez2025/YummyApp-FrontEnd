@@ -17,6 +17,7 @@ export interface CartItemDto {
     price: number;
     image: string;
     restaurantId?: number;
+    restaurantName?: string;
   };
   quantity: number;
   subtotal: number;

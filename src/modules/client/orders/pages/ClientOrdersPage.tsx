@@ -1,63 +1,76 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuthContext } from '../../../../shared/context/useAuthContext';
+import { useOrder } from '../../../shared/orders/hooks/useOrder';
+import type { CustomerOrderStatus } from '../../../../core/domain/enums/customer-order-status';
 import '../styles/ClientOrdersPage.css';
 
-// Types
-type OrderStatus = 'pending' | 'preparing' | 'shipping' | 'delivered' | 'cancelled';
-
-interface Order {
-  id: string;
+interface DisplayOrder {
+  id: string; // Display ID (e.g. #123)
+  orderId: number; // Real ID
   restaurantName: string;
   restaurantImage: string;
   date: string;
   items: string[];
   total: number;
-  status: OrderStatus;
-  statusStep: number; // 1-4 for progress line
+  status: string; // Raw status from backend
+  statusLabel: string; // Friendly label
+  statusStep: number; // 1-4
 }
 
-// Mock Data
-const MOCK_ORDERS: Order[] = [
-  {
-    id: "ORD-99283",
-    restaurantName: "Burger King - Centro",
-    restaurantImage: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=200&h=200&fit=crop",
-    date: "Hoy, 14:30",
-    items: ["Whopper Jr. Combo", "Onion Rings"],
-    total: 18.50,
-    status: 'preparing',
-    statusStep: 2
-  },
-  {
-    id: "ORD-99231",
-    restaurantName: "Pizza Hut",
-    restaurantImage: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=200&h=200&fit=crop",
-    date: "Ayer, 20:15",
-    items: ["Pepperoni Grande", "Coca Cola 2L"],
-    total: 32.00,
-    status: 'delivered',
-    statusStep: 4
-  }
-];
-
 export const ClientOrdersPage = () => {
+    const { user } = useAuthContext();
+    const { fetchMyOrders, myOrders, loadingState } = useOrder();
     const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
 
-    // Filter logic
-    const activeOrders = MOCK_ORDERS.filter(o => ['pending', 'preparing', 'shipping'].includes(o.status));
-    const historyOrders = MOCK_ORDERS.filter(o => ['delivered', 'cancelled'].includes(o.status));
+    useEffect(() => {
+        if (user?.id) {
+            fetchMyOrders(parseInt(user.id));
+        }
+    }, [user]);
+
+    const getStatusInfo = (status: string): { label: string, step: number } => {
+        // Map backend status strings to frontend UI
+        switch (status as CustomerOrderStatus) {
+            case 'RECEIVED': return { label: 'Recibido', step: 1 };
+            case 'IN_KITCHEN': return { label: 'En Cocina', step: 2 };
+            case 'ON_THE_WAY': return { label: 'En Camino', step: 3 };
+            case 'DELIVERED': return { label: 'Entregado', step: 4 };
+            default: return { label: status, step: 0 };
+        }
+    };
+
+    const mapOrders = (): DisplayOrder[] => {
+        return myOrders.map(order => {
+            const { label, step } = getStatusInfo(order.status);
+            // Derive restaurant info from first item (assuming order is from one restaurant)
+            const firstItem = order.items[0]; 
+            const restaurantName = firstItem ? firstItem.restaurantName : 'Restaurante';
+
+            
+            return {
+                id: `#${order.orderId}`,
+                orderId: order.orderId,
+                restaurantName: restaurantName, // Fixed: Use the variable
+                restaurantImage: firstItem?.imageUrl || "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=200&h=200&fit=crop",
+                date: new Date(order.createdAt).toLocaleString(),
+                items: order.items.map(i => `${i.quantity}x ${i.productName}`),
+                total: order.totalAmount,
+                status: order.status,
+                statusLabel: label,
+                statusStep: step
+            };
+        });
+    };
+
+    const allOrders = mapOrders();
+    const activeOrders = allOrders.filter(o => o.statusStep < 4);
+    const historyOrders = allOrders.filter(o => o.statusStep >= 4);
 
     const displayedOrders = activeTab === 'active' ? activeOrders : historyOrders;
 
-    const getStatusLabel = (status: OrderStatus) => {
-        const labels = {
-            pending: 'Pendiente',
-            preparing: 'Preparando',
-            shipping: 'En Camino',
-            delivered: 'Entregado',
-            cancelled: 'Cancelado'
-        };
-        return labels[status];
-    };
+    if (loadingState === 'loading') {
+        return <div className="text-center py-5"><div className="spinner-border text-primary"></div><p className="mt-2">Cargando tus pedidos...</p></div>;
+    }
 
     return (
         <div className="client-orders-page py-5">
@@ -93,11 +106,11 @@ export const ClientOrdersPage = () => {
                         </div>
                     ) : (
                         displayedOrders.map((order, index) => (
-                            <div key={order.id} className={`col-12 col-lg-8 animate-slide-in`} style={{ animationDelay: `${(index + 1) * 0.1}s` }}>
+                            <div key={order.orderId} className={`col-12 col-lg-8 animate-slide-in`} style={{ animationDelay: `${(index + 1) * 0.1}s` }}>
                                 <div className="order-card">
                                     <div className="order-header">
                                         <div>
-                                            <span className="order-id">#{order.id}</span>
+                                            <span className="order-id">{order.id}</span>
                                             <div className="order-date mt-1">
                                                 <i className="bi bi-calendar3 me-2"></i>{order.date}
                                             </div>
@@ -113,7 +126,7 @@ export const ClientOrdersPage = () => {
                                         <div className="restaurant-info">
                                             <img src={order.restaurantImage} alt={order.restaurantName} className="restaurant-logo" />
                                             <div>
-                                                <h5 className="mb-1 fw-bold">{order.restaurantName}</h5>
+                                                <h5 className="mb-1 text-muted">Restaurante: <span className="fw-bolder text-primary fs-5">{order.restaurantName}</span></h5>
                                                 <small className="text-muted">{order.items.join(", ")}</small>
                                             </div>
                                             <div className="ms-auto text-end">
@@ -144,8 +157,8 @@ export const ClientOrdersPage = () => {
                                             </div>
                                         </div>
                                         <div className="text-center mt-3">
-                                            <span className={`badge rounded-pill ${order.status === 'cancelled' ? 'bg-danger' : 'bg-info'} text-white`}>
-                                                Estado: {getStatusLabel(order.status)}
+                                            <span className={`badge rounded-pill ${order.status === 'CANCELLED' ? 'bg-danger' : 'bg-info'} text-white`}>
+                                                Estado: {order.statusLabel}
                                             </span>
                                         </div>
                                     </div>

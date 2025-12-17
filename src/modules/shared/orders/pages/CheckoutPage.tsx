@@ -65,6 +65,9 @@ export const CheckoutPage = () => {
                 return {
                     productId: parseInt(item.product.id),
                     productName: item.product.name,
+                    imageUrl: item.product.image,
+                    restaurantId: item.product.restaurantId || 0,
+                    restaurantName: item.product.restaurantName || "Restaurante",
                     unitPrice: item.product.price,
                     quantity: item.quantity,
                     note: finalNote

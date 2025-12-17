@@ -1,11 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuthContext } from '../../../../context/useAuthContext';
+import { useRestaurantContext } from '../../../../../modules/restaurant/context/RestaurantContext';
 import '../styles/Sidebar.css';
 
 export const RestaurantSidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuthContext();
+  const { restaurantName } = useRestaurantContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) => {
@@ -61,7 +63,7 @@ export const RestaurantSidebar = () => {
       <div className="sidebar-header">
         <Link to="/restaurant/dashboard" className="sidebar-logo">
           <img src="/img/png/logo.png" alt="Logo" className="sidebar-logo-img" />
-          <span className="sidebar-brand">YummyApp</span>
+          <span className="sidebar-brand">{restaurantName?.toUpperCase() || 'YUMMYAPP'}</span>
         </Link>
         <div className="sidebar-user-info">
           <div className="sidebar-user-avatar">

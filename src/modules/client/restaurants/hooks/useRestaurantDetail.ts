@@ -70,7 +70,8 @@ export const useRestaurantDetail = (restaurantId: string | undefined) => {
                 price: opt.price
               }))
             })) || [],
-            restaurantId: detail.restaurantId // Injecting restaurantId
+            restaurantId: detail.restaurantId, // Injecting restaurantId
+            restaurantName: detail.name // Injecting restaurantName
           });
         });
 
