@@ -17,7 +17,7 @@ export const useRoles = () => {
       try {
         const result = await roleAdapter.getAvailablePublicRoles();
 
-        if (result.succeeded && result.items) {
+        if (result.success && result.items) {
           setRoles(result.items);
         } else {
           throw new Error(result.message || "Error al cargar los roles");

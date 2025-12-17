@@ -16,3 +16,5 @@ export interface GenericItemName {
   id: number;
   name: string;
 }
+
+export type LoadingState = ApiStatus;

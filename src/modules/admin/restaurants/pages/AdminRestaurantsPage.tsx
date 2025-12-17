@@ -10,7 +10,7 @@ const MOCK_RESTAURANTS = [
 ];
 
 const AdminRestaurantsPage = () => {
-  const [restaurants, setRestaurants] = useState(MOCK_RESTAURANTS);
+  const [restaurants /*, setRestaurants */] = useState(MOCK_RESTAURANTS);
   const [filter, setFilter] = useState('');
 
   const filteredRestos = restaurants.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()));

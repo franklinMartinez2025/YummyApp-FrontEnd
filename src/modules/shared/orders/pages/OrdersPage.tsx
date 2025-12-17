@@ -1,8 +1,8 @@
 import { useOrders } from '../hooks/useOrders';
-import type { OrderStatusDto } from '../../../core/application/dtos/order/OrderDto';
-import { LoadingSpinner } from '../../../shared/ui/LoadingSpinner';
-import { formatCurrency } from '../../../shared/utils/formatCurrency';
-import { formatDate } from '../../../shared/utils/formatDate';
+import type { OrderStatusDto } from '../../../../core/application/dtos/order/OrderDto';
+import { LoadingSpinner } from '../../../../shared/ui/LoadingSpinner';
+import { formatCurrency } from '../../../../shared/utils/formatCurrency';
+import { formatDate } from '../../../../shared/utils/formatDate';
 import './OrdersPage.css';
 
 const getStatusLabel = (status: OrderStatusDto): string => {
@@ -48,21 +48,21 @@ export const OrdersPage = () => {
       ) : (
         <div className="orders-list">
           {orders.map((order) => (
-            <div key={order.id} className="order-card">
+            <div key={order.orderId} className="order-card">
               <div className="order-header">
                 <div>
-                  <h3>{order.restaurantName}</h3>
+                  <h3>{order.items[0]?.restaurantName || 'Restaurante'}</h3>
                   <p className="order-date">{formatDate(order.createdAt)}</p>
                 </div>
                 <span
                   className="order-status"
-                  style={{ backgroundColor: getStatusColor(order.status) }}
+                  style={{ backgroundColor: getStatusColor(order.status as OrderStatusDto) }}
                 >
-                  {getStatusLabel(order.status)}
+                  {getStatusLabel(order.status as OrderStatusDto)}
                 </span>
               </div>
               <div className="order-items">
-                {order.items.map((item, index) => (
+                {order.items.map((item: any, index: number) => (
                   <div key={index} className="order-item">
                     <span>{item.quantity}x {item.product.name}</span>
                     <span>{formatCurrency(item.subtotal)}</span>
@@ -72,7 +72,7 @@ export const OrdersPage = () => {
               <div className="order-footer">
                 <div className="order-total">
                   <span>Total:</span>
-                  <span>{formatCurrency(order.total)}</span>
+                  <span>{formatCurrency(order.totalAmount)}</span>
                 </div>
               </div>
             </div>

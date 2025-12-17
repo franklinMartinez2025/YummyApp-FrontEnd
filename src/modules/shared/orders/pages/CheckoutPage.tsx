@@ -20,7 +20,7 @@ export const CheckoutPage = () => {
         instructions: ''
     });
 
-    const [paymentData, setPaymentData] = useState<{ type: 'credit_card' | 'cash'; cardLast4?: string }>({
+    const [/* paymentData */, setPaymentData] = useState<{ type: 'credit_card' | 'cash'; cardLast4?: string }>({
         type: 'credit_card'
     });
 
